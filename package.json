@@ -14,8 +14,8 @@
   ],
   "scripts": {
     "predeploy": "medusa db:migrate",
-    "build": "medusa build --admin-only",
-    "build:admin": "medusa-admin build --deployment",
+    "build": "medusa build",
+    "build:admin": "medusa build --admin-only",
     "start": "medusa db:migrate && medusa start",
     "dev": "medusa develop",
     "seed": "medusa exec ./src/scripts/seed.ts",
