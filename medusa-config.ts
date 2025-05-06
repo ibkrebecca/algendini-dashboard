@@ -6,7 +6,6 @@ import {
   AUTH_CORS,
   COOKIE_SECRET,
   DATABASE_URL,
-  DB_DATABASE,
   JWT_SECRET,
   NODE_ENV,
   REDIS_URL,
@@ -25,12 +24,8 @@ module.exports = defineConfig({
   projectConfig: {
     databaseUrl: DATABASE_URL!,
     redisUrl: REDIS_URL!,
-    databaseName: DB_DATABASE,
     databaseDriverOptions: {
-      connection:
-        NODE_ENV !== "development"
-          ? { ssl: { rejectUnauthorized: false } }
-          : {},
+      connection: { ssl: { rejectUnauthorized: false } },
       pool: {
         min: 0,
         max: 20,
