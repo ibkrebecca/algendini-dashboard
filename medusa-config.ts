@@ -34,11 +34,11 @@ module.exports = defineConfig({
       idle_in_transaction_session_timeout: 60000,
     },
     http: {
-      storeCors: STORE_CORS!,
-      adminCors: ADMIN_CORS!,
-      authCors: AUTH_CORS!,
-      jwtSecret: JWT_SECRET || "secret",
-      cookieSecret: COOKIE_SECRET || "secret",
+      storeCors: STORE_CORS || "http://localhost:8000",
+      adminCors: ADMIN_CORS || "http://localhost:9000",
+      authCors: AUTH_CORS || "http://localhost:8000,http://localhost:9000",
+      jwtSecret: JWT_SECRET || "supersecret",
+      cookieSecret: COOKIE_SECRET || "supersecret",
     },
   },
   admin: {
