@@ -1,6 +1,9 @@
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 import {
   ADMIN_CORS,
+  ADMIN_DISABLE,
+  ADMIN_PATH,
+  ADMIN_URL,
   AUTH_CORS,
   COOKIE_SECRET,
   DATABASE_URL,
@@ -25,22 +28,6 @@ module.exports = defineConfig({
       },
       idle_in_transaction_session_timeout: 60000,
     },
-    // NODE_ENV !== "development"
-    //   ? {
-    //       connection: { ssl: { rejectUnauthorized: false } },
-    //       pool: {
-    //         min: 0,
-    //         max: 20,
-    //         acquireTimeoutMillis: 60000,
-    //       },
-    //       idle_in_transaction_session_timeout: 60000,
-    //     }
-    //   : {
-    //       pool: {
-    //         min: 0,
-    //         max: 10,
-    //       },
-    //     },
     http: {
       storeCors: STORE_CORS!,
       adminCors: ADMIN_CORS!,
@@ -48,5 +35,10 @@ module.exports = defineConfig({
       jwtSecret: JWT_SECRET || "secret",
       cookieSecret: COOKIE_SECRET || "secret",
     },
+  },
+  admin: {
+    disable: ADMIN_DISABLE === "true" || false,
+    backendUrl: ADMIN_URL || "https://localhost:9000/",
+    path: NODE_ENV !== "development" ? "/" : "/app",
   },
 });

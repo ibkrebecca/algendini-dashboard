@@ -15,4 +15,7 @@ export const REDIS_URL = process.env.REDIS_URL;
 export const DATABASE_URL =
   `postgres://${DB_USERNAME}:${DB_PASSWORD}` +
   `@${DB_HOST}:${DB_PORT}/${DB_DATABASE}`;
-// `?sslmode=${NODE_ENV === "development" ? "no-verify" : "require"}`;
+
+export const ADMIN_URL = process.env.ADMIN_URL;
+export const ADMIN_DISABLE = process.env.ADMIN_DISABLE;
+export const ADMIN_PATH = process.env.ADMIN_PATH;
