@@ -2,7 +2,6 @@ import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 import {
   ADMIN_CORS,
   ADMIN_DISABLE,
-  ADMIN_PATH,
   ADMIN_URL,
   AUTH_CORS,
   COOKIE_SECRET,
@@ -62,7 +61,6 @@ module.exports = defineConfig({
               region: S3_REGION,
               bucket: S3_BUCKET,
               endpoint: S3_ENDPOINT,
-              // other options...
             },
           },
         ],
