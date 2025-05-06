@@ -42,7 +42,7 @@ module.exports = defineConfig({
     },
   },
   admin: {
-    disable: ADMIN_DISABLE === "true" || false,
+    disable: false,
     backendUrl: ADMIN_URL || "http://localhost:9000/",
     path: NODE_ENV !== "development" ? "/" : "/app",
   },
