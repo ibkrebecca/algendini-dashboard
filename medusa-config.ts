@@ -25,7 +25,7 @@ module.exports = defineConfig({
     databaseUrl: DATABASE_URL!,
     redisUrl: REDIS_URL!,
     databaseDriverOptions: {
-      connection: { ssl: { rejectUnauthorized: false } },
+      connection: { ssl: { rejectUnauthorized: true } },
       pool: {
         min: 0,
         max: 20,
