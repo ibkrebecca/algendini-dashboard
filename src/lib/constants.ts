@@ -21,6 +21,8 @@ export const DATABASE_URL =
 export const ADMIN_URL = process.env.ADMIN_URL;
 export const ADMIN_DISABLE = process.env.ADMIN_DISABLE;
 export const ADMIN_PATH = process.env.ADMIN_PATH;
+export const MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL;
+export const MEDUSA_ADMIN_BACKEND_URL = process.env.MEDUSA_ADMIN_BACKEND_URL;
 
 export const S3_FILE_URL = process.env.S3_FILE_URL;
 export const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID;

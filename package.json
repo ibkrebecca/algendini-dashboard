@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "predeploy": "medusa db:migrate",
-    "build": "medusa build",
+    "build": "medusa build && ln -s .medusa/server/public/ public",
     "build:admin": "medusa build --admin-only",
     "start": "medusa db:migrate && medusa start",
     "dev": "medusa develop",
