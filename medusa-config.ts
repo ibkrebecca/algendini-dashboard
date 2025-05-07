@@ -43,11 +43,6 @@ module.exports = defineConfig({
       cookieSecret: COOKIE_SECRET || "supersecret",
     },
   },
-  // admin: {
-  //   disable: false,
-  //   backendUrl: ADMIN_URL || "http://localhost:9000/",
-  //   path: NODE_ENV !== "development" ? "/" : "/app",
-  // },
   modules: [
     {
       resolve: "@medusajs/medusa/file",
