@@ -35,7 +35,6 @@ export default defineConfig({
       idle_in_transaction_session_timeout: 60000,
     },
     http: {
-      // Must exactly match the comma‐separated ADMIN_CORS / AUTH_CORS / STORE_CORS
       adminCors: ADMIN_CORS!,
       authCors: AUTH_CORS!,
       storeCors: STORE_CORS!,
