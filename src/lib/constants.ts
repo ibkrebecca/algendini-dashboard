@@ -4,6 +4,7 @@ export const STORE_CORS = process.env.STORE_CORS;
 export const ADMIN_CORS = process.env.ADMIN_CORS;
 export const AUTH_CORS = process.env.AUTH_CORS;
 export const JWT_SECRET = process.env.JWT_SECRET;
+export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 export const COOKIE_SECRET = process.env.COOKIE_SECRET;
 
 export const DB_USERNAME = process.env.DB_USERNAME;

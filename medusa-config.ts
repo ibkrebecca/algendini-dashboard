@@ -1,11 +1,11 @@
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 import {
   ADMIN_CORS,
-  ADMIN_DISABLE,
   ADMIN_URL,
   AUTH_CORS,
   COOKIE_SECRET,
   DATABASE_URL,
+  JWT_EXPIRES_IN,
   JWT_SECRET,
   NODE_ENV,
   REDIS_URL,
@@ -38,6 +38,7 @@ module.exports = defineConfig({
       adminCors: ADMIN_CORS || "http://localhost:9000",
       authCors: AUTH_CORS || "http://localhost:8000,http://localhost:9000",
       jwtSecret: JWT_SECRET || "supersecret",
+      jwtExpiresIn: JWT_EXPIRES_IN,
       cookieSecret: COOKIE_SECRET || "supersecret",
     },
   },
