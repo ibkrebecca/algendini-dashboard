@@ -24,6 +24,7 @@ module.exports = defineConfig({
   projectConfig: {
     databaseUrl: DATABASE_URL!,
     redisUrl: REDIS_URL!,
+    databaseLogging: true,
     databaseDriverOptions: {
       connection: { ssl: { rejectUnauthorized: false } },
       pool: {
@@ -34,9 +35,9 @@ module.exports = defineConfig({
       idle_in_transaction_session_timeout: 60000,
     },
     http: {
-      storeCors: STORE_CORS || "http://localhost:8000",
-      adminCors: ADMIN_CORS || "http://localhost:9000",
-      authCors: AUTH_CORS || "http://localhost:8000,http://localhost:9000",
+      storeCors: STORE_CORS!,
+      adminCors: ADMIN_CORS!,
+      authCors: AUTH_CORS!,
       jwtSecret: JWT_SECRET || "supersecret",
       jwtExpiresIn: JWT_EXPIRES_IN,
       cookieSecret: COOKIE_SECRET || "supersecret",
