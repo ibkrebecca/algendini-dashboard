@@ -1,7 +1,6 @@
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 import {
   ADMIN_CORS,
-  ADMIN_URL,
   AUTH_CORS,
   COOKIE_SECRET,
   DATABASE_URL,
@@ -18,33 +17,36 @@ import {
   STORE_CORS,
 } from "./src/lib/constants";
 
+const isProd = NODE_ENV === "production";
 loadEnv(NODE_ENV || "development", process.cwd());
 
-module.exports = defineConfig({
-  projectConfig: {
-    databaseUrl: DATABASE_URL!,
-    redisUrl: REDIS_URL!,
-    databaseLogging: true,
-    databaseDriverOptions: {
-      connection: { ssl: { rejectUnauthorized: false } },
-      pool: {
-        min: 0,
-        max: 20,
-        acquireTimeoutMillis: 60000,
-      },
-      idle_in_transaction_session_timeout: 60000,
+const localDbUrl = "postgres://algendini:0000@localhost:5400/algendini";
+const databaseUrl = isProd ? DATABASE_URL! : localDbUrl;
+const getConnection = () => {
+  if (isProd) return { connection: { ssl: { rejectUnauthorized: false } } };
+  return { connection: { ssl: false } };
+};
+
+const getEmailPass = () => {
+  if (isProd) return {};
+
+  return {
+    resolve: "@medusajs/medusa/auth",
+    options: {
+      providers: [
+        {
+          resolve: "@medusajs/medusa/auth-emailpass",
+          id: "emailpass",
+          options: {},
+        },
+      ],
     },
-    http: {
-      storeCors: STORE_CORS!,
-      adminCors: ADMIN_CORS!,
-      authCors: AUTH_CORS!,
-      jwtSecret: JWT_SECRET || "supersecret",
-      jwtExpiresIn: JWT_EXPIRES_IN,
-      cookieSecret: COOKIE_SECRET || "supersecret",
-    },
-  },
-  modules: [
-    {
+  };
+};
+
+const getBucket = () => {
+  if (isProd) {
+    return {
       resolve: "@medusajs/medusa/file",
       options: {
         providers: [
@@ -62,6 +64,53 @@ module.exports = defineConfig({
           },
         ],
       },
+    };
+  }
+
+  return {
+    resolve: "@medusajs/medusa/file",
+    options: {
+      providers: [
+        {
+          resolve: "@medusajs/medusa/file-local",
+          id: "local",
+          options: {
+            upload_dir: "uploads",
+          },
+        },
+      ],
     },
-  ],
+  };
+};
+
+module.exports = defineConfig({
+  projectConfig: {
+    databaseUrl: databaseUrl,
+    redisUrl: REDIS_URL || "redis://localhost:6379",
+    databaseLogging: true,
+    redisOptions: {
+      maxRetriesPerRequest: 100,
+      lazyConnect: true,
+      connectTimeout: 10000,
+      commandTimeout: 5000,
+    },
+    databaseDriverOptions: {
+      ...getConnection(),
+      idle_in_transaction_session_timeout: 60000,
+      pool: {
+        min: 0,
+        max: 20,
+        acquireTimeoutMillis: 60000,
+      },
+    },
+    http: {
+      storeCors: STORE_CORS || "http://localhost:8000",
+      adminCors: ADMIN_CORS || "http://localhost:9000",
+      authCors: AUTH_CORS || "http://localhost:9000",
+      jwtSecret: JWT_SECRET || "supersecret",
+      cookieSecret: COOKIE_SECRET || "supersecret",
+      jwtExpiresIn: JWT_EXPIRES_IN || "7d",
+    },
+  },
+  modules: [getEmailPass(), getBucket()],
 });
