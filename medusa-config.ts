@@ -112,5 +112,11 @@ module.exports = defineConfig({
       jwtExpiresIn: JWT_EXPIRES_IN || "7d",
     },
   },
-  modules: [getEmailPass(), getBucket()],
+  modules: [
+    getEmailPass(),
+    getBucket(),
+    {
+      resolve: "./src/modules/customer",
+    },
+  ],
 });

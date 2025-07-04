@@ -5,13 +5,31 @@ import { rateLimit } from "./middlewares/rate_limit";
 
 export default defineMiddlewares({
   routes: [
-    {
-      matcher: "/admin/products*",
-      middlewares: [
-        corsMiddleware,
-        apiKeyAuth,
-        rateLimit(50, 15 * 60 * 1000),
-      ],
-    },
+    // {
+    //   matcher: "/admin/(products|categories)*",
+    //   method: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    //   middlewares: [
+    //     (req, res, next) => {
+    //       // block only specific API endpoints that we've moved to /api/admin/
+    //       const blockedPaths = ["/admin/products", "/admin/categories"];
+    //       const isBlocked = blockedPaths.some((path) =>
+    //         req.path.startsWith(path)
+    //       );
+
+    //       if (isBlocked) {
+    //         return res.status(404).json({
+    //           error: "Not Found",
+    //           message: "The requested resource was not found",
+    //         });
+    //       }
+    //       next();
+    //     },
+    //   ],
+    // },
+    // {
+    //   matcher: "/api/admin/(products|categories)*",
+    //   method: ["GET"],
+    //   middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    // },
   ],
 });

@@ -20,8 +20,6 @@ export function apiKeyAuth(
 ): void {
   // get API key from header
   const apiKey = req.headers["x-api-key"] as string;
-
-  console.log(apiKey);
   
   // check if API key exists
   if (!apiKey) {
