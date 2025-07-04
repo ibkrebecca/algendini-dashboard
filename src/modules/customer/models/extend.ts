@@ -1,4 +1,4 @@
-// src/modules/customer/models/customer.ts
+// src/modules/customer/models/extend.ts
 import { model } from "@medusajs/framework/utils";
 
 export const ExtendedCustomer = model.define("extended_customer", {
@@ -7,4 +7,5 @@ export const ExtendedCustomer = model.define("extended_customer", {
   gender: model.text(),
   is_admin: model.boolean(),
   is_driver: model.boolean(),
+  created_on: model.dateTime(),
 });
