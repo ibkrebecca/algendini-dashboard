@@ -1,28 +1,26 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { registerCustomerWorkflow } from "../../../../../workflows/customer/register";
+import { updateCustomerWorkflow } from "../../../../../workflows/customer/update";
 
 // define the request body type
 interface RegisterCustomerRequest {
-  email: string;
-  password: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  dob: string;
-  gender: "male" | "female";
-  is_admin: boolean;
-  is_driver: boolean;
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  dob?: string;
+  gender?: "male" | "female";
+  is_admin?: boolean;
+  is_driver?: boolean;
 }
 
-// /api/store/customers/register/ - register a new customer
+// /api/store/customers/update/ - update a customer
 export async function POST(
   req: MedusaRequest<RegisterCustomerRequest>,
   res: MedusaResponse
 ): Promise<void> {
   try {
     const {
-      email,
-      password,
+      id,
       first_name,
       last_name,
       phone,
@@ -33,17 +31,29 @@ export async function POST(
     } = req.body as RegisterCustomerRequest;
 
     // validate required fields
-    if (!email || !password) {
+    if (!id) {
       res.status(400).json({
         error: "Bad Request",
-        message: "Email and password are required",
+        message: "Customer id is required",
       });
     }
 
-    const { result } = await registerCustomerWorkflow(req.scope).run({
+    // validate dob format if provided
+    if (dob) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
+      if (!dateRegex.test(dob)) {
+        res.status(400).json({
+          error: "Bad Request",
+          message:
+            "Invalid date format for dob. Use ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)",
+        });
+        return;
+      }
+    }
+
+    const { result } = await updateCustomerWorkflow(req.scope).run({
       input: {
-        email,
-        password,
+        id,
         first_name,
         last_name,
         phone,
@@ -68,35 +78,30 @@ export async function POST(
         is_admin: result.extendedCustomer.is_admin,
         is_driver: result.extendedCustomer.is_driver,
       },
-      message: "Customer registered successfully",
+      message: "Customer updated successfully",
     });
   } catch (error) {
-    console.error("Error registering customer:", error);
+    console.error("Error updating customer:", error);
 
-    if (error.message?.includes("already exists")) {
-      res.status(409).json({
-        error: "Conflict",
-        message: error.message,
+    if (error.message?.includes("not found")) {
+      res.status(404).json({
+        error: "Not Found",
+        message: "Customer not found",
       });
+      return;
     }
 
-    if (error.message?.includes("email")) {
+    if (error.message?.includes("Invalid date")) {
       res.status(400).json({
         error: "Bad Request",
-        message: "Invalid email format",
+        message: "Invalid date format provided",
       });
-    }
-
-    if (error.message?.includes("password")) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Password does not meet requirements",
-      });
+      return;
     }
 
     res.status(500).json({
-      error: "Internal server error",
-      message: "Failed to register customer",
+      error: "Internal Server Error",
+      message: "Failed to update customer",
     });
   }
 }

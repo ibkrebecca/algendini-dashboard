@@ -20,12 +20,6 @@ interface RegisterCustomerInput {
   is_driver: boolean;
 }
 
-interface RegisterCustomerOutput {
-  customer: any;
-  extendedCustomer: any;
-  authIdentity: any;
-}
-
 // step 1: create customer profile
 const createCustomerStep = createStep(
   "create_customer",

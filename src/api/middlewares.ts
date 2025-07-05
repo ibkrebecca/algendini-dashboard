@@ -48,5 +48,21 @@ export default defineMiddlewares({
         is_driver: z.boolean().default(false),
       },
     },
+
+    {
+      matcher: "/api/store/customers/update",
+      method: "POST",
+      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+      additionalDataValidator: {
+        id: z.string(),
+        first_name: z.string().optional(),
+        last_name: z.string().optional(),
+        phone: z.string().optional(),
+        dob: z.string().datetime().optional(),
+        gender: z.enum(["male", "female"]).optional(),
+        is_admin: z.boolean().optional(),
+        is_driver: z.boolean().optional(),
+      },
+    },
   ],
 });
