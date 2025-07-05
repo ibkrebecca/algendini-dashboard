@@ -89,8 +89,8 @@ module.exports = defineConfig({
     redisUrl: REDIS_URL || "redis://localhost:6379",
     databaseLogging: true,
     redisOptions: {
-      maxRetriesPerRequest: 100,
-      lazyConnect: true,
+      maxRetriesPerRequest: 20,
+      lazyConnect: false,
       connectTimeout: 10000,
       commandTimeout: 5000,
     },

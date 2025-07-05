@@ -1,0 +1,1 @@
+# All Store API Routes

@@ -20,7 +20,7 @@ export function apiKeyAuth(
 ): void {
   // get API key from header
   const apiKey = req.headers["x-api-key"] as string;
-  
+
   // check if API key exists
   if (!apiKey) {
     res.status(401).json({
@@ -31,9 +31,15 @@ export function apiKeyAuth(
   }
 
   // validate API key (you should store this securely in environment variables)
-  const validApiKeys = process.env.API_KEYS?.split(",") || [];
+  const LOCAL_PUBLIC_KEY = process.env.LOCAL_PUBLIC_KEY!;
+  const PUBLIC_KEY = process.env.PUBLIC_KEY!;
 
-  if (!validApiKeys.includes(apiKey)) {
+  const isProd = process.env.NODE_ENV === "production";
+  const localPublicKey = LOCAL_PUBLIC_KEY?.split(",") || [];
+  const prodPublicKey = PUBLIC_KEY?.split(",") || [];
+  const publicKey = isProd ? prodPublicKey : localPublicKey;
+
+  if (!publicKey.includes(apiKey)) {
     res.status(401).json({
       error: "Unauthorized",
       message: "Invalid API key",
