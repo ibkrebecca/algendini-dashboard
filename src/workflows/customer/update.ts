@@ -1,4 +1,4 @@
-// src/workflows/customer/register.ts
+// src/workflows/customer/update.ts
 import {
   createStep,
   createWorkflow,

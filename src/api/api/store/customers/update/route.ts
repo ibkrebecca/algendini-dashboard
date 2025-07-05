@@ -2,7 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { updateCustomerWorkflow } from "../../../../../workflows/customer/update";
 
 // define the request body type
-interface RegisterCustomerRequest {
+interface UpdateCustomerRequest {
   id: string;
   first_name?: string;
   last_name?: string;
@@ -15,7 +15,7 @@ interface RegisterCustomerRequest {
 
 // /api/store/customers/update/ - update a customer
 export async function POST(
-  req: MedusaRequest<RegisterCustomerRequest>,
+  req: MedusaRequest<UpdateCustomerRequest>,
   res: MedusaResponse
 ): Promise<void> {
   try {
@@ -28,7 +28,7 @@ export async function POST(
       gender,
       is_admin = false,
       is_driver = false,
-    } = req.body as RegisterCustomerRequest;
+    } = req.body as UpdateCustomerRequest;
 
     // validate required fields
     if (!id) {

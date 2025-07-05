@@ -5,6 +5,60 @@ import { rateLimit } from "./middlewares/rate_limit";
 import { z } from "zod";
 
 const blockedPaths = ["/admin", "/store"];
+
+const customer_apis: Array<any> = [
+  {
+    matcher: "/api/store/customers/register",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      email: z.string().email("Invalid email format"),
+      password: z.string().min(8, "Password must be at least 8 characters"),
+      first_name: z.string(),
+      last_name: z.string(),
+      phone: z.string(),
+      dob: z.string().datetime(),
+      gender: z.enum(["male", "female"]),
+      is_admin: z.boolean().default(false),
+      is_driver: z.boolean().default(false),
+    },
+  },
+
+  {
+    matcher: "/api/store/customers/update",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      id: z.string(),
+      first_name: z.string().optional(),
+      last_name: z.string().optional(),
+      phone: z.string().optional(),
+      dob: z.string().datetime().optional(),
+      gender: z.enum(["male", "female"]).optional(),
+      is_admin: z.boolean().optional(),
+      is_driver: z.boolean().optional(),
+    },
+  },
+
+  {
+    matcher: "/api/store/customers/retrieve",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      id: z.string(),
+    },
+  },
+
+  {
+    matcher: "/api/store/customers/delete",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      id: z.string(),
+    },
+  },
+];
+
 export default defineMiddlewares({
   routes: [
     {
@@ -32,37 +86,6 @@ export default defineMiddlewares({
       middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
     },
 
-    {
-      matcher: "/api/store/customers/register",
-      method: "POST",
-      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
-      additionalDataValidator: {
-        email: z.string().email("Invalid email format"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
-        first_name: z.string(),
-        last_name: z.string(),
-        phone: z.string(),
-        dob: z.string().datetime(),
-        gender: z.enum(["male", "female"]),
-        is_admin: z.boolean().default(false),
-        is_driver: z.boolean().default(false),
-      },
-    },
-
-    {
-      matcher: "/api/store/customers/update",
-      method: "POST",
-      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
-      additionalDataValidator: {
-        id: z.string(),
-        first_name: z.string().optional(),
-        last_name: z.string().optional(),
-        phone: z.string().optional(),
-        dob: z.string().datetime().optional(),
-        gender: z.enum(["male", "female"]).optional(),
-        is_admin: z.boolean().optional(),
-        is_driver: z.boolean().optional(),
-      },
-    },
+    ...customer_apis,
   ],
 });
