@@ -1,63 +1,103 @@
-// /api/store/customers/register/ - register a new customer
-// src/api/store/customers/register/route.ts
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
+import { registerCustomerWorkflow } from "../../../../../workflows/customer/register";
 
-export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const {
-    first_name,
-    last_name,
-    has_account,
-    groups,
-    addresses,
-    phone,
-    email,
-    password,
-    dob,
-    gender,
-    is_admin,
-    is_driver,
-  } = req.body as {
-    first_name: string;
-    last_name: string;
-    has_account: boolean;
-    groups: [];
-    addresses: [];
-    phone: string;
-    email: string;
-    password: string;
-    dob: string;
-    gender: "male" | "female";
-    is_admin: boolean;
-    is_driver: boolean;
-  };
+// define the request body type
+interface RegisterCustomerRequest {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  dob: string;
+  gender: "male" | "female";
+  is_admin: boolean;
+  is_driver: boolean;
+}
 
-  // 1. Register the customer
-  const customerModuleService = req.scope.resolve(Modules.CUSTOMER);
-  const customer = await customerModuleService.createCustomers({
-    first_name: first_name,
-    last_name: last_name,
-    email: email,
-    phone: phone,
-    has_account: has_account,
-    addresses: addresses,
-  });
+// /api/store/customers/register/ - register a new customer
+export async function POST(
+  req: MedusaRequest<RegisterCustomerRequest>,
+  res: MedusaResponse
+): Promise<void> {
+  try {
+    const {
+      email,
+      password,
+      first_name,
+      last_name,
+      phone,
+      dob,
+      gender,
+      is_admin = false,
+      is_driver = false,
+    } = req.body;
 
-  // 2. Create the extended customer data and link it
-  const extendedCustomerService = req.scope.resolve("extended_customer");
-//   const extendedCustomer = await extendedCustomerService.create({
-//     customer_id: customer.id,
-//     dob,
-//     gender,
-//     is_admin,
-//     is_driver,
-//     groups,
-//     created_on: new Date(),
-//   });
+    // validate required fields
+    if (!email || !password) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "Email and password are required",
+      });
+    }
 
-  // 3. Return the result
-  res.json({
-    customer,
-    // extended_customer: extendedCustomer,
-  });
+    const { result } = await registerCustomerWorkflow(req.scope).run({
+      input: {
+        email,
+        password,
+        first_name,
+        last_name,
+        phone,
+        dob,
+        gender,
+        is_admin,
+        is_driver,
+      },
+    });
+
+    // return success response without sensitive data
+    res.status(201).json({
+      customer: {
+        id: result.customer.id,
+        email: result.customer.email,
+        first_name: result.customer.first_name,
+        last_name: result.customer.last_name,
+        phone: result.customer.phone,
+        created_at: result.customer.created_at,
+        dob: result.extendedCustomer.dob,
+        gender: result.extendedCustomer.gender,
+        is_admin: result.extendedCustomer.is_admin,
+        is_driver: result.extendedCustomer.is_driver,
+      },
+      message: "Customer registered successfully",
+    });
+  } catch (error) {
+    console.error("Error registering customer:", error);
+
+    if (error.message?.includes("already exists")) {
+      res.status(409).json({
+        error: "Conflict",
+        message: error.message,
+      });
+    }
+
+    if (error.message?.includes("email")) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid email format",
+      });
+    }
+
+    if (error.message?.includes("password")) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "Password does not meet requirements",
+      });
+    }
+
+    res.status(500).json({
+      error: "Internal server error",
+      message: "Failed to register customer",
+    });
+  }
 }
