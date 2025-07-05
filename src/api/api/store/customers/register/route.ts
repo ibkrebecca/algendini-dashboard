@@ -8,6 +8,7 @@ interface RegisterCustomerRequest {
   first_name: string;
   last_name: string;
   phone: string;
+  avatar_url: string;
   dob: string;
   gender: "male" | "female";
   is_admin: boolean;
@@ -26,6 +27,7 @@ export async function POST(
       first_name,
       last_name,
       phone,
+      avatar_url,
       dob,
       gender,
       is_admin = false,
@@ -47,6 +49,7 @@ export async function POST(
         first_name,
         last_name,
         phone,
+        avatar_url,
         dob,
         gender,
         is_admin,
@@ -63,6 +66,7 @@ export async function POST(
         last_name: result.customer.last_name,
         phone: result.customer.phone,
         created_at: result.customer.created_at,
+        avatar_url: result.extendedCustomer.avatar_url,
         dob: result.extendedCustomer.dob,
         gender: result.extendedCustomer.gender,
         is_admin: result.extendedCustomer.is_admin,

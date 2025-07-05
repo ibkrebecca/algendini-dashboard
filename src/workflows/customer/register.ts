@@ -14,6 +14,7 @@ interface RegisterCustomerInput {
   first_name: string;
   last_name: string;
   phone: string;
+  avatar_url: string;
   dob: string;
   gender: "male" | "female";
   is_admin: boolean;
@@ -97,6 +98,7 @@ const createExtendedCustomerStep = createStep(
   async (
     input: {
       customerId: string;
+      avatar_url: string;
       dob: string;
       gender: string;
       is_admin: boolean;
@@ -109,6 +111,7 @@ const createExtendedCustomerStep = createStep(
     const extendedCustomer =
       await extendedCustomerService.createExtendedCustomers({
         id: input.customerId,
+        avatar_url: input.avatar_url,
         dob: new Date(input.dob),
         gender: input.gender,
         is_admin: input.is_admin,
@@ -150,6 +153,7 @@ export const registerCustomerWorkflow = createWorkflow(
     // step 3: create extended customer data
     const extendedCustomer = createExtendedCustomerStep({
       customerId: customer.id,
+      avatar_url: input.avatar_url,
       dob: input.dob,
       gender: input.gender,
       is_admin: input.is_admin,

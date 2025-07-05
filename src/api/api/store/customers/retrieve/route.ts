@@ -37,6 +37,7 @@ export async function POST(
         last_name: result.customer.last_name,
         phone: result.customer.phone,
         created_at: result.customer.created_at,
+        avatar_url: result.extendedCustomer.avatar_url,
         dob: result.extendedCustomer.dob,
         gender: result.extendedCustomer.gender,
         is_admin: result.extendedCustomer.is_admin,
