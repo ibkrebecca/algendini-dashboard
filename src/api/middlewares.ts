@@ -7,11 +7,10 @@ import { z } from "zod";
 export default defineMiddlewares({
   routes: [
     {
-      matcher: "/admin/(products|categories)*",
+      matcher: "/store/(products|categories)*",
       method: ["GET", "POST", "PUT", "DELETE", "PATCH"],
       middlewares: [
         (req, res, next) => {
-          // block only specific API endpoints that we've moved to /api/admin/
           const blockedPaths = ["/admin/products", "/admin/categories"];
           const isBlocked = blockedPaths.some((p) => req.path.startsWith(p));
 
@@ -21,14 +20,14 @@ export default defineMiddlewares({
               message: "The requested resource was not found",
             });
           }
-          
+
           next();
         },
       ],
     },
 
     {
-      matcher: "/api/admin/(products|categories)*",
+      matcher: "/api/store/(products|categories)*",
       method: ["GET"],
       middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
     },
