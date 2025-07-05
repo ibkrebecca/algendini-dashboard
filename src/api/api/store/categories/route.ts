@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
 
-// /api/admin/categories - get all categories
+// /api/store/categories - get all categories
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
@@ -23,7 +23,6 @@ export async function GET(
         relations: ["parent_category", "category_children", "products"],
         take: parseInt(limit as string),
         skip: parseInt(offset as string),
-        // order: { created_at: "DESC" },
       });
 
     res.json({
