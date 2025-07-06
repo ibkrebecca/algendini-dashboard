@@ -1,4 +1,4 @@
-import { loadEnv, defineConfig } from "@medusajs/framework/utils";
+import { loadEnv, defineConfig, Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import {
   ADMIN_CORS,
   AUTH_CORS,
@@ -32,6 +32,7 @@ const getEmailPass = () => {
 
   return {
     resolve: "@medusajs/medusa/auth",
+    dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
     options: {
       providers: [
         {

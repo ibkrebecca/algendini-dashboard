@@ -15,6 +15,15 @@
           "nullable": false,
           "mappedType": "text"
         },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
         "dob": {
           "name": "dob",
           "type": "timestamptz",

@@ -10,7 +10,7 @@ const customer_apis: Array<any> = [
   {
     matcher: "/api/store/customers/register",
     method: "POST",
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(10, 15 * 60 * 1000)],
     additionalDataValidator: {
       email: z.string().email("Invalid email format"),
       password: z.string().min(8, "Password must be at least 8 characters"),
@@ -27,7 +27,7 @@ const customer_apis: Array<any> = [
   {
     matcher: "/api/store/customers/update",
     method: "POST",
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
     additionalDataValidator: {
       id: z.string(),
       first_name: z.string().optional(),
@@ -52,9 +52,29 @@ const customer_apis: Array<any> = [
   {
     matcher: "/api/store/customers/delete",
     method: "POST",
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(5, 15 * 60 * 1000)],
     additionalDataValidator: {
       id: z.string(),
+    },
+  },
+
+  {
+    matcher: "/api/store/customers/reset_password",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(10, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      email: z.string(),
+    },
+  },
+
+  {
+    matcher: "/api/store/customers/reset_password_confirm",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(10, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      email: z.string(),
+      token: z.string(),
+      new_password: z.string(),
     },
   },
 ];
@@ -65,7 +85,7 @@ export default defineMiddlewares({
       matcher: "/store/(products|categories|customers)*",
       method: ["GET", "POST", "PUT", "DELETE", "PATCH"],
       middlewares: [
-        (req, res, next) => {
+        (req: any, res: any, next: any) => {
           const isBlocked = blockedPaths.some((p) => req.path.startsWith(p));
 
           if (isBlocked) {

@@ -42,7 +42,7 @@ export async function POST(
       message: "Customer deleted successfully",
     });
   } catch (error) {
-    console.error("Error updating customer:", error);
+    console.error("Error deleting customer:", error);
 
     if (error.message?.includes("not found")) {
       res.status(404).json({
