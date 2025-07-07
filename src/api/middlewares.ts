@@ -9,8 +9,22 @@ import { z } from "zod";
 import { ResetPasswordRequest } from "./validators";
 import { validateScopeProviderAssociation } from "@medusajs/medusa/api/auth/utils/validate-scope-provider-association";
 import { validateToken } from "@medusajs/medusa/api/auth/utils/validate-token";
+import multer from "multer";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const customer_apis: Array<any> = [
+  {
+    matcher: "/store/customers/avatar",
+    method: "POST",
+    middlewares: [
+      corsMiddleware,
+      apiKeyAuth,
+      rateLimit(10, 15 * 60 * 1000),
+      upload.single("avatar"),
+    ],
+  },
+
   {
     matcher: "/store/customers/register",
     method: "POST",
