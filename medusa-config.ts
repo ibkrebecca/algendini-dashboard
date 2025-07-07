@@ -1,4 +1,9 @@
-import { loadEnv, defineConfig, Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import {
+  loadEnv,
+  defineConfig,
+  Modules,
+  ContainerRegistrationKeys,
+} from "@medusajs/framework/utils";
 import {
   ADMIN_CORS,
   AUTH_CORS,
@@ -14,6 +19,8 @@ import {
   S3_FILE_URL,
   S3_REGION,
   S3_SECRET_ACCESS_KEY,
+  SENDGRID_API_KEY,
+  SENDGRID_FROM,
   STORE_CORS,
 } from "./src/lib/constants";
 
@@ -84,6 +91,25 @@ const getBucket = () => {
   };
 };
 
+const getSendEmail = () => {
+  return {
+    resolve: "@medusajs/medusa/notification",
+    options: {
+      providers: [
+        {
+          resolve: "@medusajs/medusa/notification-sendgrid",
+          id: "sendgrid",
+          options: {
+            channels: ["email"],
+            api_key: SENDGRID_API_KEY,
+            from: SENDGRID_FROM,
+          },
+        },
+      ],
+    },
+  };
+};
+
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: databaseUrl,
@@ -116,6 +142,7 @@ module.exports = defineConfig({
   modules: [
     getEmailPass(),
     getBucket(),
+    getSendEmail(),
     {
       resolve: "./src/modules/customer",
     },
