@@ -1,12 +1,12 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { deleteCustomerWorkflow } from "../../../../../workflows/customer/delete";
+import { deleteCustomerWorkflow } from "../../../../workflows/customer/delete";
 
 // define the request body type
 interface DeleteCustomerRequest {
   id: string;
 }
 
-// /api/store/customers/delete/ - delete a customer
+// /store/customers/delete/ - delete a customer
 export async function POST(
   req: MedusaRequest<DeleteCustomerRequest>,
   res: MedusaResponse
@@ -49,7 +49,6 @@ export async function POST(
         error: "Not Found",
         message: "Customer not found",
       });
-      return;
     }
 
     res.status(500).json({

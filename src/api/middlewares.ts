@@ -10,11 +10,9 @@ import { ResetPasswordRequest } from "./validators";
 import { validateScopeProviderAssociation } from "@medusajs/medusa/api/auth/utils/validate-scope-provider-association";
 import { validateToken } from "@medusajs/medusa/api/auth/utils/validate-token";
 
-const blockedPaths = ["/admin", "/store"];
-
 const customer_apis: Array<any> = [
   {
-    matcher: "/api/store/customers/register",
+    matcher: "/store/customers/register",
     method: "POST",
     middlewares: [corsMiddleware, apiKeyAuth, rateLimit(10, 15 * 60 * 1000)],
     additionalDataValidator: {
@@ -31,7 +29,7 @@ const customer_apis: Array<any> = [
   },
 
   {
-    matcher: "/api/store/customers/signin",
+    matcher: "/store/customers/signin",
     method: "POST",
     middlewares: [
       corsMiddleware,
@@ -42,7 +40,7 @@ const customer_apis: Array<any> = [
   },
 
   {
-    matcher: "/api/store/customers/update",
+    matcher: "/store/customers/update",
     method: "POST",
     middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
     additionalDataValidator: {
@@ -58,7 +56,7 @@ const customer_apis: Array<any> = [
   },
 
   {
-    matcher: "/api/store/customers/retrieve",
+    matcher: "/store/customers/retrieve",
     method: "POST",
     middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
     additionalDataValidator: {
@@ -67,7 +65,7 @@ const customer_apis: Array<any> = [
   },
 
   {
-    matcher: "/api/store/customers/delete",
+    matcher: "/store/customers/delete",
     method: "POST",
     middlewares: [corsMiddleware, apiKeyAuth, rateLimit(5, 15 * 60 * 1000)],
     additionalDataValidator: {
@@ -76,7 +74,7 @@ const customer_apis: Array<any> = [
   },
 
   {
-    matcher: "/api/store/customers/reset_password",
+    matcher: "/store/customers/reset_password",
     method: "POST",
     middlewares: [
       corsMiddleware,
@@ -87,7 +85,7 @@ const customer_apis: Array<any> = [
   },
 
   {
-    matcher: "/api/store/customers/reset_password_confirm",
+    matcher: "/store/customers/reset_password_confirm",
     method: "POST",
     middlewares: [
       corsMiddleware,
@@ -102,26 +100,7 @@ const customer_apis: Array<any> = [
 export default defineMiddlewares({
   routes: [
     {
-      matcher: "/store/(products|categories|customers)*",
-      method: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-      middlewares: [
-        (req: any, res: any, next: any) => {
-          const isBlocked = blockedPaths.some((p) => req.path.startsWith(p));
-
-          if (isBlocked) {
-            return res.status(404).json({
-              error: "Not Found",
-              message: "The requested resource was not found",
-            });
-          }
-
-          next();
-        },
-      ],
-    },
-
-    {
-      matcher: "/api/store/(products|categories)*",
+      matcher: "/store/(products|categories)*",
       method: ["GET"],
       middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
     },

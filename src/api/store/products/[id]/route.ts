@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
 
-// /api/store/products/{id} - get product by id
+// /store/products/{id} - get product by id
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse

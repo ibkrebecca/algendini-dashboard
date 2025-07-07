@@ -1,7 +1,12 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { registerCustomerWorkflow } from "../../../../../workflows/customer/register";
+import { ConfigModule } from "@medusajs/framework/types";
+import {
+  ContainerRegistrationKeys,
+} from "@medusajs/framework/utils";
+import { registerCustomerWorkflow } from "../../../../workflows/customer/register";
+import { generateJwtTokenForAuthIdentity } from "@medusajs/medusa/api/auth/utils/generate-jwt-token";
 
-// define the request body type
+// Define the request body type
 interface RegisterCustomerRequest {
   email: string;
   password: string;
@@ -15,7 +20,7 @@ interface RegisterCustomerRequest {
   is_driver: boolean;
 }
 
-// /api/store/customers/register/ - register a new customer
+// /store/customers/register/ - register a new customer
 export async function POST(
   req: MedusaRequest<RegisterCustomerRequest>,
   res: MedusaResponse
@@ -42,6 +47,12 @@ export async function POST(
       });
     }
 
+    // get config for JWT generation
+    const config: ConfigModule = req.scope.resolve(
+      ContainerRegistrationKeys.CONFIG_MODULE
+    );
+
+    // run the enhanced workflow
     const { result } = await registerCustomerWorkflow(req.scope).run({
       input: {
         email,
@@ -54,10 +65,29 @@ export async function POST(
         gender,
         is_admin,
         is_driver,
+        // pass request context for auth service
+        url: req.url,
+        headers: req.headers,
+        query: req.query,
+        protocol: req.protocol,
       },
     });
 
-    // return success response without sensitive data
+    // generate JWT token for the authenticated user
+    const { http } = config.projectConfig;
+    const token = generateJwtTokenForAuthIdentity(
+      {
+        authIdentity: result.authIdentity,
+        actorType: "customer",
+      },
+      {
+        secret: http.jwtSecret!,
+        expiresIn: http.jwtExpiresIn,
+        options: http.jwtOptions,
+      }
+    );
+
+    //  success response with token and customer data
     res.status(201).json({
       customer: {
         id: result.customer.id,
@@ -72,15 +102,21 @@ export async function POST(
         is_admin: result.extendedCustomer.is_admin,
         is_driver: result.extendedCustomer.is_driver,
       },
+      token,
       message: "Customer registered successfully",
     });
   } catch (error) {
     console.error("Error registering customer:", error);
 
-    if (error.message?.includes("already exists")) {
+    // handle specific error cases
+    if (
+      error.message?.includes("already exists") ||
+      error.message?.includes("duplicate") ||
+      error.message?.includes("conflict")
+    ) {
       res.status(409).json({
         error: "Conflict",
-        message: error.message,
+        message: "Customer with this email already exists",
       });
     }
 
@@ -98,6 +134,14 @@ export async function POST(
       });
     }
 
+    if (error.message?.includes("Authentication")) {
+      res.status(401).json({
+        error: "Unauthorized",
+        message: error.message,
+      });
+    }
+
+    // Generic server error
     res.status(500).json({
       error: "Internal server error",
       message: "Failed to register customer",

@@ -5,7 +5,7 @@ import {
 import { IAuthModuleService } from "@medusajs/framework/types";
 import { MedusaError, Modules } from "@medusajs/framework/utils";
 
-// /api/store/customers/reset_password_confirm/ - reset password confirmation for a customer
+// /store/customers/reset_password_confirm/ - reset password confirmation for a customer
 export const POST = async (
   req: AuthenticatedMedusaRequest,
   res: MedusaResponse

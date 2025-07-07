@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
 
-// /api/store/categories - get all categories
+// /store/categories - get all categories
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
@@ -33,6 +33,7 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error fetching categories:", error);
+    
     res.status(500).json({
       error: "Internal server error",
       message: "Failed to fetch categories",

@@ -1,12 +1,12 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveCustomerWorkflow } from "../../../../../workflows/customer/retrieve";
+import { retrieveCustomerWorkflow } from "../../../../workflows/customer/retrieve";
 
 // define the request body type
 interface RetrieveCustomerRequest {
   id: string;
 }
 
-// /api/store/customers/retrieve/ - retrieve a customer
+// /store/customers/retrieve/ - retrieve a customer
 export async function POST(
   req: MedusaRequest<RetrieveCustomerRequest>,
   res: MedusaResponse
@@ -53,7 +53,6 @@ export async function POST(
         error: "Not Found",
         message: "Customer not found",
       });
-      return;
     }
 
     res.status(500).json({

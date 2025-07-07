@@ -45,7 +45,9 @@ const getEmailPass = () => {
         {
           resolve: "@medusajs/medusa/auth-emailpass",
           id: "emailpass",
-          options: {},
+          options: {
+            actor_type: "customer",
+          },
         },
       ],
     },

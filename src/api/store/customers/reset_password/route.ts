@@ -6,7 +6,7 @@ import {
 } from "@medusajs/framework/http";
 import { ResetPasswordRequestType } from "@medusajs/medusa/api/auth/validators";
 
-// /api/store/customers/reset_password/ - reset password for a customer
+// /store/customers/reset_password/ - reset password for a customer
 export const POST = async (
   req: AuthenticatedMedusaRequest<ResetPasswordRequestType>,
   res: MedusaResponse
@@ -23,6 +23,7 @@ export const POST = async (
       actorType: "customer",
       provider: "emailpass",
       secret: http.jwtSecret!,
+      jwtOptions: http.jwtOptions,
     },
     throwOnError: false, // we don't want to throw on error to avoid leaking information about non-existing identities
   });

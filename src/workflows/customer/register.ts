@@ -7,6 +7,12 @@ import {
 } from "@medusajs/framework/workflows-sdk";
 import { Modules } from "@medusajs/framework/utils";
 import { EXTENDED_CUSTOMER_MODULE } from "../../modules/customer";
+import {
+  IAuthModuleService,
+  AuthenticationInput,
+  CustomerDTO,
+} from "@medusajs/framework/types";
+import { setAuthAppMetadataStep } from "@medusajs/medusa/core-flows";
 
 interface RegisterCustomerInput {
   email: string;
@@ -19,80 +25,93 @@ interface RegisterCustomerInput {
   gender: "male" | "female";
   is_admin: boolean;
   is_driver: boolean;
+  // these for auth service compatibility
+  url?: string;
+  headers?: any;
+  query?: any;
+  protocol?: string;
 }
 
-// step 1: create customer profile
-const createCustomerStep = createStep(
-  "create_customer",
+// step 1: register using auth service (creates both customer and auth identity)
+const registerWithAuthServiceStep = createStep(
+  "register_with_auth_service",
   async (input: RegisterCustomerInput, { container }) => {
+    const authService: IAuthModuleService = container.resolve(Modules.AUTH);
+
+    // prepare auth data for the service
+    const authData = {
+      url: input.url || "/store/customers/register",
+      headers: input.headers || {},
+      query: input.query || {},
+      body: {
+        email: input.email,
+        password: input.password,
+        first_name: input.first_name,
+        last_name: input.last_name,
+        phone: input.phone,
+      },
+      protocol: input.protocol || "https",
+    } as AuthenticationInput;
+
+    const { success, error, authIdentity } = await authService.register(
+      "emailpass",
+      authData
+    );
+
+    if (!success || !authIdentity) {
+      throw new Error(error || "Authentication registration failed");
+    }
+
+    // get the created customer
     const customerService = container.resolve(Modules.CUSTOMER);
-
-    // check if customer already exists
-    const existingCustomers = await customerService.listCustomers({
+    const customers = await customerService.listCustomers({
       email: input.email,
     });
 
-    if (existingCustomers.length > 0) {
-      throw new Error("Customer with this email already exists");
+    let customer: CustomerDTO;
+    if (customers.length === 0) {
+      customer = await customerService.createCustomers({
+        email: input.email,
+        first_name: input.first_name,
+        last_name: input.last_name,
+        phone: input.phone,
+        has_account: true,
+      });
+    } else {
+      customer = customers[0];
     }
 
-    const customer = await customerService.createCustomers({
-      email: input.email,
-      first_name: input.first_name,
-      last_name: input.last_name,
-      phone: input.phone,
-      has_account: true,
-    });
-
-    return new StepResponse(customer, {
-      customerId: customer.id,
-    });
+    return new StepResponse(
+      { customer, authIdentity },
+      {
+        customerId: customer.id,
+        authIdentityId: authIdentity.id,
+      }
+    );
   },
   async (revert, { container }) => {
-    // revert: delete the customer if something goes wrong
-    if (revert?.customerId) {
-      const customerService = container.resolve(Modules.CUSTOMER);
-      await customerService.deleteCustomers(revert.customerId);
-    }
-  }
-);
-
-// step 2: create auth identity
-const createAuthIdentityStep = createStep(
-  "create_auth_identity",
-  async (
-    input: { customerId: string; email: string; password: string },
-    { container }
-  ) => {
-    const authService = container.resolve(Modules.AUTH);
-
-    const authIdentity = await authService.createAuthIdentities({
-      id: input.customerId,
-      provider_identities: [
-        {
-          provider: "emailpass",
-          entity_id: input.email,
-          provider_metadata: {
-            password: input.password,
-          },
-        },
-      ],
-    });
-
-    return new StepResponse(authIdentity, {
-      authIdentityId: authIdentity.id,
-    });
-  },
-  async (revert, { container }) => {
-    // revert: delete the auth identity if something goes wrong
+    // revert: delete both customer and auth identity if something goes wrong
     if (revert?.authIdentityId) {
-      const authService = container.resolve(Modules.AUTH);
-      await authService.deleteAuthIdentities([revert.authIdentityId]);
+      try {
+        const authService: IAuthModuleService = container.resolve(Modules.AUTH);
+        await authService.deleteAuthIdentities([revert.authIdentityId]);
+      } catch (error) {
+        console.error("Failed to revert auth identity:", error);
+      }
+    }
+
+    if (revert?.customerId) {
+      try {
+        const customerService = container.resolve(Modules.CUSTOMER);
+        await customerService.deleteCustomers(revert.customerId);
+      } catch (error) {
+        console.error("Failed to revert customer:", error);
+      }
     }
   }
 );
 
-// step 3: create extended customer data
+// step 2: create extended customer data
 const createExtendedCustomerStep = createStep(
   "create_extended_customer",
   async (
@@ -126,33 +145,30 @@ const createExtendedCustomerStep = createStep(
   async (revert, { container }) => {
     // revert: delete the extended customer data if something goes wrong
     if (revert?.extendedCustomerId) {
-      const extendedCustomerService = container.resolve(
-        EXTENDED_CUSTOMER_MODULE
-      );
-      await extendedCustomerService.deleteExtendedCustomers(
-        revert.extendedCustomerId
-      );
+      try {
+        const extendedCustomerService = container.resolve(
+          EXTENDED_CUSTOMER_MODULE
+        );
+        await extendedCustomerService.deleteExtendedCustomers(
+          revert.extendedCustomerId
+        );
+      } catch (error) {
+        console.error("Failed to revert extended customer:", error);
+      }
     }
   }
 );
 
-// main workflow
+// Main workflow
 export const registerCustomerWorkflow = createWorkflow(
   "register_customer",
   function (input: RegisterCustomerInput) {
-    // step 1: create customer
-    const customer = createCustomerStep(input);
+    // Step 1: Register using auth service (creates customer + auth identity)
+    const registrationResult = registerWithAuthServiceStep(input);
 
-    // step 2: create auth identity
-    const authIdentity = createAuthIdentityStep({
-      customerId: customer.id,
-      email: input.email,
-      password: input.password,
-    });
-
-    // step 3: create extended customer data
+    // Step 2: Create extended customer data
     const extendedCustomer = createExtendedCustomerStep({
-      customerId: customer.id,
+      customerId: registrationResult.customer.id,
       avatar_url: input.avatar_url,
       dob: input.dob,
       gender: input.gender,
@@ -160,9 +176,16 @@ export const registerCustomerWorkflow = createWorkflow(
       is_driver: input.is_driver,
     });
 
+    // step 3: set app_metadata on auth identity
+    setAuthAppMetadataStep({
+      authIdentityId: registrationResult.authIdentity.id,
+      actorType: "customer",
+      value: registrationResult.customer.id,
+    });
+
     return new WorkflowResponse({
-      customer,
-      authIdentity,
+      customer: registrationResult.customer,
+      authIdentity: registrationResult.authIdentity,
       extendedCustomer,
     });
   }

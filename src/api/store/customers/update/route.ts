@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { updateCustomerWorkflow } from "../../../../../workflows/customer/update";
+import { updateCustomerWorkflow } from "../../../../workflows/customer/update";
 
 // define the request body type
 interface UpdateCustomerRequest {
@@ -13,7 +13,7 @@ interface UpdateCustomerRequest {
   is_driver?: boolean;
 }
 
-// /api/store/customers/update/ - update a customer
+// /store/customers/update/ - update a customer
 export async function POST(
   req: MedusaRequest<UpdateCustomerRequest>,
   res: MedusaResponse
@@ -47,7 +47,6 @@ export async function POST(
           message:
             "Invalid date format for dob. Use ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)",
         });
-        return;
       }
     }
 
@@ -88,7 +87,6 @@ export async function POST(
         error: "Not Found",
         message: "Customer not found",
       });
-      return;
     }
 
     if (error.message?.includes("Invalid date")) {
@@ -96,7 +94,6 @@ export async function POST(
         error: "Bad Request",
         message: "Invalid date format provided",
       });
-      return;
     }
 
     res.status(500).json({

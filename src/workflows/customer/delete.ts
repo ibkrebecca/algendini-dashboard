@@ -7,6 +7,7 @@ import {
 } from "@medusajs/framework/workflows-sdk";
 import { Modules } from "@medusajs/framework/utils";
 import { EXTENDED_CUSTOMER_MODULE } from "../../modules/customer";
+import { AuthIdentityDTO } from "@medusajs/framework/types";
 
 interface DeleteCustomerInput {
   id: string;
@@ -57,15 +58,24 @@ const deleteAuthIdentityStep = createStep(
 
     let deletedAuthIdentity: any = null;
     try {
-      // first retrieve the auth identity to store for potential rollback
-      const existingAuthIdentity = await authService.retrieveAuthIdentity(
-        input.customerId
+      // get authIdentities
+      const authIdentities = await authService.listAuthIdentities(
+        {
+          app_metadata: {
+            customer_id: input.customerId,
+          },
+        },
+        {
+          select: ["id", "provider_id", "app_metadata"],
+        }
       );
 
-      // delete the auth identity
-      await authService.deleteAuthIdentities([input.customerId]);
+      const auth_ids = authIdentities.map((ai: AuthIdentityDTO) => ai.id);
 
-      deletedAuthIdentity = existingAuthIdentity;
+      // delete the auth identity
+      await authService.deleteAuthIdentities(auth_ids);
+
+      deletedAuthIdentity = authIdentities;
     } catch (error) {
       // if auth identity doesn't exist, that's fine - continue with deletion
       if (error.type !== "not_found") throw error;

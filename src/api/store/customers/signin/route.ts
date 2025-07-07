@@ -11,7 +11,7 @@ import {
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { generateJwtTokenForAuthIdentity } from "@medusajs/medusa/api/auth/utils/generate-jwt-token";
 
-// /api/store/customers/signin/ - signin a customer
+// /store/customers/signin/ - signin a customer
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const config: ConfigModule = req.scope.resolve(
     ContainerRegistrationKeys.CONFIG_MODULE
@@ -47,12 +47,13 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       {
         secret: http.jwtSecret!,
         expiresIn: http.jwtExpiresIn,
+        options: http.jwtOptions,
       }
     );
 
     return res.status(200).json({ token });
   }
-  
+
   throw new MedusaError(
     MedusaError.Types.UNAUTHORIZED,
     error || "Authentication failed"
