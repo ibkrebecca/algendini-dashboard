@@ -1,76 +1,33 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { Modules } from "@medusajs/framework/utils";
-
-// define the request body type
-interface ConfirmResetPasswordRequest {
-  email: string;
-  token: string;
-  new_password: string;
-}
+import {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from "@medusajs/framework/http";
+import { IAuthModuleService } from "@medusajs/framework/types";
+import { MedusaError, Modules } from "@medusajs/framework/utils";
 
 // /api/store/customers/reset_password_confirm/ - reset password confirmation for a customer
-export async function POST(
-  req: MedusaRequest<ConfirmResetPasswordRequest>,
+export const POST = async (
+  req: AuthenticatedMedusaRequest,
   res: MedusaResponse
-): Promise<void> {
-  const authModuleService = req.scope.resolve(Modules.AUTH);
+) => {
+  const authService = req.scope.resolve<IAuthModuleService>(Modules.AUTH);
 
-  try {
-    const { email, token, new_password } =
-      req.body as ConfirmResetPasswordRequest;
+  const updateData = {
+    ...(req.body as Record<string, unknown>),
+    entity_id: req.auth_context.actor_id, // comes from the validated token
+  };
 
-    // validate required fields
-    if (!token || !new_password || !email) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Token, email and new password are required",
-      });
-      return;
-    }
+  const { authIdentity, success, error } = await authService.updateProvider(
+    "emailpass",
+    updateData
+  );
 
-    // validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Invalid email format",
-      });
-    }
-
-    // validate password strength
-    if (new_password.length < 8) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Password must be at least 8 characters long",
-      });
-      return;
-    }
-
-    // run the medusa auth module to update password
-    const { success } = await authModuleService.updateProvider("emailpass", {
-      entity_id: email,
-      password: new_password,
-      token,
-    });
-
-    console.log(success);
-
-    if (!success) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Failed to update password. Invalid token or email.",
-      });
-    } else {
-      res.status(200).json({
-        message: "Password has been successfully reset",
-      });
-    }
-  } catch (error) {
-    console.error("Error updating password for customer:", error);
-
-    res.status(500).json({
-      error: "Internal Server Error",
-      message: "Failed to update password for customer",
-    });
+  if (success && authIdentity) {
+    return res.status(200).json({ success: true });
   }
-}
+
+  throw new MedusaError(
+    MedusaError.Types.UNAUTHORIZED,
+    error || "Unauthorized"
+  );
+};

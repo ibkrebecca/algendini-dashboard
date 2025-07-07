@@ -1,8 +1,14 @@
-import { defineMiddlewares } from "@medusajs/framework/http";
+import {
+  defineMiddlewares,
+  validateAndTransformBody,
+} from "@medusajs/framework/http";
 import { corsMiddleware } from "./middlewares/cors";
 import { apiKeyAuth } from "./middlewares/api_key_auth";
 import { rateLimit } from "./middlewares/rate_limit";
 import { z } from "zod";
+import { ResetPasswordRequest } from "./validators";
+import { validateScopeProviderAssociation } from "@medusajs/medusa/api/auth/utils/validate-scope-provider-association";
+import { validateToken } from "@medusajs/medusa/api/auth/utils/validate-token";
 
 const blockedPaths = ["/admin", "/store"];
 
@@ -22,6 +28,17 @@ const customer_apis: Array<any> = [
       is_admin: z.boolean().default(false),
       is_driver: z.boolean().default(false),
     },
+  },
+
+  {
+    matcher: "/api/store/customers/signin",
+    method: "POST",
+    middlewares: [
+      corsMiddleware,
+      apiKeyAuth,
+      rateLimit(10, 15 * 60 * 1000),
+      validateScopeProviderAssociation(),
+    ],
   },
 
   {
@@ -61,21 +78,24 @@ const customer_apis: Array<any> = [
   {
     matcher: "/api/store/customers/reset_password",
     method: "POST",
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(10, 15 * 60 * 1000)],
-    additionalDataValidator: {
-      email: z.string(),
-    },
+    middlewares: [
+      corsMiddleware,
+      apiKeyAuth,
+      rateLimit(10, 15 * 60 * 1000),
+      validateAndTransformBody(ResetPasswordRequest),
+    ],
   },
 
   {
     matcher: "/api/store/customers/reset_password_confirm",
     method: "POST",
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(10, 15 * 60 * 1000)],
-    additionalDataValidator: {
-      email: z.string(),
-      token: z.string(),
-      new_password: z.string(),
-    },
+    middlewares: [
+      corsMiddleware,
+      apiKeyAuth,
+      rateLimit(10, 15 * 60 * 1000),
+      validateScopeProviderAssociation(),
+      validateToken(),
+    ],
   },
 ];
 

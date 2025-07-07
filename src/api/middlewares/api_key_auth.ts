@@ -19,7 +19,7 @@ export function apiKeyAuth(
   next: MedusaNextFunction
 ): void {
   // get API key from header
-  const apiKey = req.headers["x-api-key"] as string;
+  const apiKey = req.headers["x-publishable-api-key"] as string;
 
   // check if API key exists
   if (!apiKey) {

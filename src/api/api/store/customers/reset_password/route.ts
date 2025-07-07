@@ -1,57 +1,33 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { generateResetPasswordTokenWorkflow } from "@medusajs/medusa/core-flows";
-import { JWT_SECRET } from "../../../../../lib/constants";
-
-// define the request body type
-interface ResetPasswordRequest {
-  email: string;
-}
+import { generateResetPasswordTokenWorkflow } from "@medusajs/core-flows";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from "@medusajs/framework/http";
+import { ResetPasswordRequestType } from "@medusajs/medusa/api/auth/validators";
 
 // /api/store/customers/reset_password/ - reset password for a customer
-export async function POST(
-  req: MedusaRequest<ResetPasswordRequest>,
+export const POST = async (
+  req: AuthenticatedMedusaRequest<ResetPasswordRequestType>,
   res: MedusaResponse
-): Promise<void> {
-  try {
-    const { email } = req.body as ResetPasswordRequest;
+) => {
+  const { identifier } = req.validatedBody;
 
-    // validate required fields
-    if (!email) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Customer email is required",
-      });
-    }
+  const { http } = req.scope.resolve(
+    ContainerRegistrationKeys.CONFIG_MODULE
+  ).projectConfig;
 
-    // validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Invalid email format",
-      });
-    }
+  await generateResetPasswordTokenWorkflow(req.scope).run({
+    input: {
+      entityId: identifier,
+      actorType: "customer",
+      provider: "emailpass",
+      secret: http.jwtSecret!,
+    },
+    throwOnError: false, // we don't want to throw on error to avoid leaking information about non-existing identities
+  });
 
-    // run the medusa workflow to generate a reset password token
-    await generateResetPasswordTokenWorkflow(req.scope).run({
-      input: {
-        entityId: email,
-        actorType: "customer",
-        provider: "emailpass",
-        secret: JWT_SECRET || "supersecret",
-      },
-    });
+  res.sendStatus(201);
+};
 
-    // return success response without sensitive data
-    res.status(201).json({
-      message: "You will receive an email with a link to reset the password.",
-    });
-  } catch (error) {
-    console.error("Error resetting password for customer:", error);
-
-    res.status(500).json({
-      error: "Internal Server Error",
-      message: "Failed to reset password for customer",
-    });
-  }
-}
+export const AUTHENTICATE = false;
