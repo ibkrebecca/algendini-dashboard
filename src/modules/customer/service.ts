@@ -19,7 +19,7 @@ class ExtendedCustomerModuleService extends MedusaService({
     });
   }
 
-  // Custom method to get extended customer with error handling
+  // custom method to get extended customer with error handling
   async getExtendedCustomerSafely(id: string) {
     try {
       return await this.retrieveExtendedCustomer(id);
@@ -31,7 +31,7 @@ class ExtendedCustomerModuleService extends MedusaService({
     }
   }
 
-  // Extended Customer Address custom methods
+  // extended Customer Address custom methods
   async getAddressesByCustomer(customerId: string) {
     return await this.listExtendedCustomerAddresses({
       customer_id: customerId,

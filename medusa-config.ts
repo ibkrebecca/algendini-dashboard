@@ -146,5 +146,8 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/customer",
     },
+    {
+      resolve: "./src/modules/product_category",
+    },
   ],
 });
