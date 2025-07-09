@@ -7,7 +7,7 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { limit = 50, offset = 0, q } = req.query;
+    const { limit = 50, offset = 0, q, } = req.query;
 
     // build filters
     const filters: any = { is_active: true, is_internal: false };
