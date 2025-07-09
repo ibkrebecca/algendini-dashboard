@@ -5,62 +5,36 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { Modules } from "@medusajs/framework/utils";
-import { EXTENDED_CUSTOMER_MODULE } from "../../modules/customer";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
-interface RetrieveCustomerInput {
-  id: string;
-}
-
-// step 1: retrieve main customer
-const retrieveCustomerStep = createStep(
+// retrieve customer
+const retrieveCustomer = createStep(
   "retrieve_customer",
-  async (input: RetrieveCustomerInput, { container }) => {
-    const customerService = container.resolve(Modules.CUSTOMER);
+  async (input: any, { container }) => {
+    const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
-    // retrieve customer
-    const customer = await customerService.retrieveCustomer(input.id);
+    const { data: customer } = await query.graph({
+      entity: "customer",
+      fields: [
+        "*",
+        "groups.*",
+        "addresses.*",
+        "extended_customer.*",
+        "addresses.extended_customer_address.*",
+      ],
+      filters: { id: input.id },
+    });
 
     if (!customer) throw new Error(`Customer with id ${input.id} not found`);
     return new StepResponse(customer);
   }
 );
 
-// step 2: retrieve extended customer data
-const retrieveExtendedCustomerStep = createStep(
-  "retrieve_extended_customer",
-  async (input: { customerId: string }, { container }) => {
-    const extendedCustomerService = container.resolve(EXTENDED_CUSTOMER_MODULE);
-
-    try {
-      const extendedCustomer =
-        await extendedCustomerService.retrieveExtendedCustomer(
-          input.customerId
-        );
-      return new StepResponse(extendedCustomer);
-    } catch (error) {
-      // if extended customer doesn't exist, return null instead of throwing error
-      if (error.type === "not_found") return new StepResponse(null);
-      throw error;
-    }
-  }
-);
-
-// main workflow
+// workflow
 export const retrieveCustomerWorkflow = createWorkflow(
-  "retrieve_customer",
-  function (input: RetrieveCustomerInput) {
-    // step 1: retrieve main customer
-    const customer = retrieveCustomerStep(input);
-
-    // step 2: retrieve extended customer data
-    const extendedCustomer = retrieveExtendedCustomerStep({
-      customerId: input.id,
-    });
-
-    return new WorkflowResponse({
-      customer,
-      extendedCustomer,
-    });
+  "retrieve_customer_workflow",
+  function (input: any) {
+    const customer = retrieveCustomer(input.id);
+    return new WorkflowResponse(customer[0]);
   }
 );

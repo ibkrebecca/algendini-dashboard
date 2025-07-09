@@ -1,18 +1,13 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { retrieveCustomerWorkflow } from "../../../../workflows/customer/retrieve";
 
-// define the request body type
-interface RetrieveCustomerRequest {
-  id: string;
-}
-
 // /store/customers/retrieve/ - retrieve a customer
-export async function POST(
-  req: MedusaRequest<RetrieveCustomerRequest>,
+export async function GET(
+  req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { id } = req.body as RetrieveCustomerRequest;
+    const { id } = req.query;
 
     // validate required fields
     if (!id) {
@@ -22,31 +17,13 @@ export async function POST(
       });
     }
 
-    const { result } = await retrieveCustomerWorkflow(req.scope).run({
-      input: {
-        id,
-      },
+    const { result: customer } = await retrieveCustomerWorkflow(req.scope).run({
+      input: { id },
     });
 
-    // return success response without sensitive data
-    res.status(201).json({
-      customer: {
-        id: result.customer.id,
-        email: result.customer.email,
-        first_name: result.customer.first_name,
-        last_name: result.customer.last_name,
-        phone: result.customer.phone,
-        created_at: result.customer.created_at,
-        avatar_url: result.extendedCustomer.avatar_url,
-        dob: result.extendedCustomer.dob,
-        gender: result.extendedCustomer.gender,
-        is_admin: result.extendedCustomer.is_admin,
-        is_driver: result.extendedCustomer.is_driver,
-      },
-      message: "Customer retrieved successfully",
-    });
+    res.json(customer);
   } catch (error) {
-    console.error("Error updating customer:", error);
+    console.error("Error retriving customer:", error);
 
     if (error.message?.includes("not found")) {
       res.status(404).json({

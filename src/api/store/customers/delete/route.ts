@@ -1,18 +1,17 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { deleteCustomerWorkflow } from "../../../../workflows/customer/delete";
 
-// define the request body type
-interface DeleteCustomerRequest {
+interface InputType {
   id: string;
 }
 
 // /store/customers/delete/ - delete a customer
 export async function POST(
-  req: MedusaRequest<DeleteCustomerRequest>,
+  req: MedusaRequest<InputType>,
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { id } = req.body as DeleteCustomerRequest;
+    const { id } = req.body as InputType;
 
     // validate required fields
     if (!id) {
@@ -22,25 +21,13 @@ export async function POST(
       });
     }
 
-    const { result } = await deleteCustomerWorkflow(req.scope).run({
+    const { result: deleted } = await deleteCustomerWorkflow(req.scope).run({
       input: {
         id,
       },
     });
 
-    // return success response without sensitive data
-    res.status(201).json({
-      customer: {
-        deleted: result.deleted,
-        customerId: result.customerId,
-        details: {
-          customer: result.customerDeleted,
-          extendedCustomer: result.extendedCustomerDeleted,
-          authIdentity: result.authIdentityDeleted,
-        },
-      },
-      message: "Customer deleted successfully",
-    });
+    res.status(201).json(deleted);
   } catch (error) {
     console.error("Error deleting customer:", error);
 

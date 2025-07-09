@@ -5,6 +5,6 @@ export const ExtendedProductCategory = model.define(
   "extended_product_category",
   {
     id: model.id().primaryKey(),
-    image: model.text(),
+    image: model.text().nullable(),
   }
 );

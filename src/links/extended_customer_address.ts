@@ -1,9 +1,14 @@
 // src/links/extended_customer_address.ts
 import { defineLink } from "@medusajs/framework/utils";
-import CustomerAddressModule from "@medusajs/medusa/customer";
+import CustomerModule from "@medusajs/medusa/customer";
 import ExtendedCustomerModule from "../modules/customer";
 
 export default defineLink(
-  CustomerAddressModule.linkable.customer,
-  ExtendedCustomerModule.linkable.extendedCustomerAddress
+  CustomerModule.linkable.customerAddress,
+  ExtendedCustomerModule.linkable.extendedCustomerAddress,
+  {
+    database: {
+      table: "customer_customer_address_extended",
+    },
+  }
 );

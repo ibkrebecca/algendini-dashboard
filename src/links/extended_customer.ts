@@ -5,5 +5,10 @@ import ExtendedCustomerModule from "../modules/customer";
 
 export default defineLink(
   CustomerModule.linkable.customer,
-  ExtendedCustomerModule.linkable.extendedCustomer
+  ExtendedCustomerModule.linkable.extendedCustomer,
+  {
+    database: {
+      table: "customer_customer_extended",
+    },
+  }
 );

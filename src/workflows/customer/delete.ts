@@ -5,61 +5,37 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { Modules } from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 import { EXTENDED_CUSTOMER_MODULE } from "../../modules/customer";
 import { AuthIdentityDTO } from "@medusajs/framework/types";
 
-interface DeleteCustomerInput {
+interface InputType {
   id: string;
 }
 
-// step 1: delete extended customer data first
-const deleteExtendedCustomerStep = createStep(
+const deleteExtendedCustomer = createStep(
   "delete_extended_customer",
   async (input: { customerId: string }, { container }) => {
     const extendedCustomerService = container.resolve(EXTENDED_CUSTOMER_MODULE);
 
-    let deletedExtendedCustomer: any = null;
     try {
-      // first retrieve the extended customer to store for potential rollback
-      const existingExtendedCustomer =
-        await extendedCustomerService.retrieveExtendedCustomer(
-          input.customerId
-        );
-
-      // delete the extended customer
       await extendedCustomerService.deleteExtendedCustomers(input.customerId);
-
-      deletedExtendedCustomer = existingExtendedCustomer;
     } catch (error) {
-      // if extended customer doesn't exist, that's fine - continue with deletion
       if (error.type !== "not_found") throw error;
     }
 
-    return new StepResponse(
-      { deleted: deletedExtendedCustomer !== null },
-      {
-        customerId: input.customerId,
-        deletedExtendedCustomer,
-      }
-    );
+    return new StepResponse(true);
   },
-  async (revert, { container }) => {
-    // NO REVERT: do not recreate auth identity
-    // once deleted, it stays deleted
-  }
+  async (revert, { container }) => {}
 );
 
-// step 2: delete auth identity
-const deleteAuthIdentityStep = createStep(
+const deleteAuthIdentity = createStep(
   "delete_auth_identity",
   async (input: { customerId: string }, { container }) => {
     const authService = container.resolve(Modules.AUTH);
 
-    let deletedAuthIdentity: any = null;
     try {
-      // get authIdentities
-      const authIdentities = await authService.listAuthIdentities(
+      const identities = await authService.listAuthIdentities(
         {
           app_metadata: {
             customer_id: input.customerId,
@@ -70,88 +46,70 @@ const deleteAuthIdentityStep = createStep(
         }
       );
 
-      const auth_ids = authIdentities.map((ai: AuthIdentityDTO) => ai.id);
+      const auth_ids = identities.map((ai: AuthIdentityDTO) => ai.id);
 
-      // delete the auth identity
       await authService.deleteAuthIdentities(auth_ids);
-
-      deletedAuthIdentity = authIdentities;
     } catch (error) {
-      // if auth identity doesn't exist, that's fine - continue with deletion
       if (error.type !== "not_found") throw error;
     }
 
-    return new StepResponse(
-      { deleted: deletedAuthIdentity !== null },
-      {
-        customerId: input.customerId,
-        deletedAuthIdentity,
-      }
-    );
+    return new StepResponse(true);
   },
-  async (revert, { container }) => {
-    // NO REVERT: do not recreate auth identity
-    // once deleted, it stays deleted
-  }
+  async (revert, { container }) => {}
 );
 
-// step 3: delete main customer
-const deleteCustomerStep = createStep(
+const deleteCustomer = createStep(
   "delete_customer",
   async (input: { customerId: string }, { container }) => {
     const customerService = container.resolve(Modules.CUSTOMER);
+    const link = container.resolve(ContainerRegistrationKeys.LINK);
 
-    // first retrieve the customer to store for potential rollback
-    const existingCustomer = await customerService.retrieveCustomer(
-      input.customerId
-    );
+    const exist = await customerService.retrieveCustomer(input.customerId);
 
-    if (!existingCustomer) {
+    if (!exist) {
       throw new Error(`Customer with id ${input.customerId} not found`);
     }
 
-    // delete the customer
     await customerService.deleteCustomers(input.customerId);
 
-    return new StepResponse(
-      { deleted: true, customerId: input.customerId },
-      {
-        customerId: input.customerId,
-        deletedCustomer: existingCustomer,
-      }
-    );
+    // delete link to extended customer
+    await link.delete({
+      [Modules.CUSTOMER]: { customer_id: input.customerId },
+      extended_customer: {
+        extended_customer_id: input.customerId,
+      },
+    });
+
+    return new StepResponse(true);
   },
-  async (revert, { container }) => {
-    // NO REVERT: do not recreate customer
-    // once deleted, it stays deleted
-  }
+  async (revert, { container }) => {}
 );
 
-// main workflow
+// workflow
 export const deleteCustomerWorkflow = createWorkflow(
-  "delete_customer",
-  function (input: DeleteCustomerInput) {
-    // step 1: delete extended customer data first
-    const extendedCustomerResult = deleteExtendedCustomerStep({
+  "delete_customer_workflow",
+  function (input: InputType) {
+    // delete extended customer
+    const extendedCustomer = deleteExtendedCustomer({
       customerId: input.id,
     });
 
-    // step 2: delete auth identity
-    const authIdentityResult = deleteAuthIdentityStep({
+    // delete auth identity
+    const authIdentity = deleteAuthIdentity({
       customerId: input.id,
     });
 
-    // step 3: delete main customer last
-    const customerResult = deleteCustomerStep({
+    // delete customer
+    const customer = deleteCustomer({
       customerId: input.id,
     });
 
     return new WorkflowResponse({
+      customer_id: input.id,
       deleted: true,
-      customerId: input.id,
-      extendedCustomerDeleted: extendedCustomerResult.deleted,
-      authIdentityDeleted: authIdentityResult.deleted,
-      customerDeleted: customerResult.deleted,
+      extended_customer_deleted: extendedCustomer,
+      auth_identity_deleted: authIdentity,
+      customer_deleted: customer,
     });
   }
 );

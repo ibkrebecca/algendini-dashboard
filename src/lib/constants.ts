@@ -1,5 +1,12 @@
 export const NODE_ENV = process.env.NODE_ENV;
 
+export const IS_PROD = NODE_ENV === "production";
+
+export const ADMIN_URL = process.env.ADMIN_URL;
+export const STORE_URL = process.env.STORE_URL;
+export const BASE_ADMIN_URL = IS_PROD ? ADMIN_URL : "http://localhost:9000/app";
+export const BASE_STORE_URL = IS_PROD ? STORE_URL : "http://localhost:9000";
+
 export const STORE_CORS = process.env.STORE_CORS;
 export const ADMIN_CORS = process.env.ADMIN_CORS;
 export const AUTH_CORS = process.env.AUTH_CORS;
@@ -16,9 +23,8 @@ export const REDIS_URL = process.env.REDIS_URL;
 export const DATABASE_URL =
   `postgres://${DB_USERNAME}:${DB_PASSWORD}` +
   `@${DB_HOST}:${DB_PORT}/${DB_DATABASE}` +
-  `${NODE_ENV !== "development" ? "?ssl_mode=require" : ""}`;
+  `${IS_PROD ? "" : "?ssl_mode=require"}`;
 
-export const ADMIN_URL = process.env.ADMIN_URL;
 export const ADMIN_DISABLE = process.env.ADMIN_DISABLE;
 export const ADMIN_PATH = process.env.ADMIN_PATH;
 export const MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL;

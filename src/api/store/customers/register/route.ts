@@ -1,13 +1,9 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { ConfigModule } from "@medusajs/framework/types";
-import {
-  ContainerRegistrationKeys,
-} from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { registerCustomerWorkflow } from "../../../../workflows/customer/register";
 import { generateJwtTokenForAuthIdentity } from "@medusajs/medusa/api/auth/utils/generate-jwt-token";
 
-// Define the request body type
-interface RegisterCustomerRequest {
+interface InputType {
   email: string;
   password: string;
   first_name: string;
@@ -22,10 +18,11 @@ interface RegisterCustomerRequest {
 
 // /store/customers/register/ - register a new customer
 export async function POST(
-  req: MedusaRequest<RegisterCustomerRequest>,
+  req: MedusaRequest<InputType>,
   res: MedusaResponse
 ): Promise<void> {
   try {
+    const config = req.scope.resolve(ContainerRegistrationKeys.CONFIG_MODULE);
     const {
       email,
       password,
@@ -37,7 +34,7 @@ export async function POST(
       gender,
       is_admin = false,
       is_driver = false,
-    } = req.body as RegisterCustomerRequest;
+    } = req.body as InputType;
 
     // validate required fields
     if (!email || !password) {
@@ -47,12 +44,6 @@ export async function POST(
       });
     }
 
-    // get config for JWT generation
-    const config: ConfigModule = req.scope.resolve(
-      ContainerRegistrationKeys.CONFIG_MODULE
-    );
-
-    // run the enhanced workflow
     const { result } = await registerCustomerWorkflow(req.scope).run({
       input: {
         email,
@@ -75,9 +66,9 @@ export async function POST(
 
     // generate JWT token for the authenticated user
     const { http } = config.projectConfig;
-    const token = generateJwtTokenForAuthIdentity(
+    const token: string = generateJwtTokenForAuthIdentity(
       {
-        authIdentity: result.authIdentity,
+        authIdentity: result.auth_identity,
         actorType: "customer",
       },
       {
@@ -87,28 +78,13 @@ export async function POST(
       }
     );
 
-    //  success response with token and customer data
     res.status(201).json({
-      customer: {
-        id: result.customer.id,
-        email: result.customer.email,
-        first_name: result.customer.first_name,
-        last_name: result.customer.last_name,
-        phone: result.customer.phone,
-        created_at: result.customer.created_at,
-        avatar_url: result.extendedCustomer.avatar_url,
-        dob: result.extendedCustomer.dob,
-        gender: result.extendedCustomer.gender,
-        is_admin: result.extendedCustomer.is_admin,
-        is_driver: result.extendedCustomer.is_driver,
-      },
+      result,
       token,
-      message: "Customer registered successfully",
     });
   } catch (error) {
     console.error("Error registering customer:", error);
 
-    // handle specific error cases
     if (
       error.message?.includes("already exists") ||
       error.message?.includes("duplicate") ||
@@ -141,7 +117,6 @@ export async function POST(
       });
     }
 
-    // Generic server error
     res.status(500).json({
       error: "Internal server error",
       message: "Failed to register customer",

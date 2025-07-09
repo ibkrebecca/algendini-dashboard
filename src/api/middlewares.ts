@@ -1,5 +1,8 @@
 import {
   defineMiddlewares,
+  MedusaNextFunction,
+  MedusaRequest,
+  MedusaResponse,
   validateAndTransformBody,
 } from "@medusajs/framework/http";
 import { corsMiddleware } from "./middlewares/cors";
@@ -14,17 +17,6 @@ import multer from "multer";
 const upload = multer({ storage: multer.memoryStorage() });
 
 const customer_apis: Array<any> = [
-  {
-    matcher: "/store/customers/avatar",
-    method: "POST",
-    middlewares: [
-      corsMiddleware,
-      apiKeyAuth,
-      rateLimit(10, 15 * 60 * 1000),
-      upload.single("avatar"),
-    ],
-  },
-
   {
     matcher: "/store/customers/register",
     method: "POST",
@@ -70,15 +62,6 @@ const customer_apis: Array<any> = [
   },
 
   {
-    matcher: "/store/customers/retrieve",
-    method: "POST",
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
-    additionalDataValidator: {
-      id: z.string(),
-    },
-  },
-
-  {
     matcher: "/store/customers/delete",
     method: "POST",
     middlewares: [corsMiddleware, apiKeyAuth, rateLimit(5, 15 * 60 * 1000)],
@@ -109,16 +92,60 @@ const customer_apis: Array<any> = [
       validateToken(),
     ],
   },
+
+  {
+    matcher: "/store/customers/retrieve",
+    method: "GET",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      id: z.string(),
+    },
+  },
+];
+
+const product_apis: Array<any> = [
+  {
+    matcher: "/admin/product-categories/:id",
+    method: "GET",
+    middlewares: [
+      (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+        req.allowed?.push("extended_product_category");
+        next();
+      },
+    ],
+  },
+
+  {
+    matcher: "/store/(products|categories)*",
+    method: ["GET"],
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(200, 15 * 60 * 1000)],
+  },
+
+  {
+    matcher: "/store/categories/update_image",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(10, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      id: z.string(),
+      url: z.string(),
+    },
+  },
 ];
 
 export default defineMiddlewares({
   routes: [
     {
-      matcher: "/store/(products|categories)*",
-      method: ["GET"],
-      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(50, 15 * 60 * 1000)],
+      matcher: "/store/upload/single_image",
+      method: "POST",
+      middlewares: [
+        corsMiddleware,
+        apiKeyAuth,
+        rateLimit(10, 15 * 60 * 1000),
+        upload.single("image"),
+      ],
     },
 
     ...customer_apis,
+    ...product_apis,
   ],
 });

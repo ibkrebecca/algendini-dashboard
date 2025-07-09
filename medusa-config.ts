@@ -9,6 +9,7 @@ import {
   AUTH_CORS,
   COOKIE_SECRET,
   DATABASE_URL,
+  IS_PROD,
   JWT_EXPIRES_IN,
   JWT_SECRET,
   NODE_ENV,
@@ -24,18 +25,17 @@ import {
   STORE_CORS,
 } from "./src/lib/constants";
 
-const isProd = NODE_ENV === "production";
 loadEnv(NODE_ENV || "development", process.cwd());
 
 const localDbUrl = "postgres://algendini:0000@localhost:5400/algendini";
-const databaseUrl = isProd ? DATABASE_URL! : localDbUrl;
+const databaseUrl = IS_PROD ? DATABASE_URL! : localDbUrl;
 const getConnection = () => {
-  if (isProd) return { connection: { ssl: { rejectUnauthorized: false } } };
+  if (IS_PROD) return { connection: { ssl: { rejectUnauthorized: false } } };
   return { connection: { ssl: false } };
 };
 
 const getEmailPass = () => {
-  if (isProd) return {};
+  if (IS_PROD) return {};
 
   return {
     resolve: "@medusajs/medusa/auth",
@@ -55,7 +55,7 @@ const getEmailPass = () => {
 };
 
 const getBucket = () => {
-  if (isProd) {
+  if (IS_PROD) {
     return {
       resolve: "@medusajs/medusa/file",
       options: {

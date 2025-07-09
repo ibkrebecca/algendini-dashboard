@@ -1,8 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { updateCustomerWorkflow } from "../../../../workflows/customer/update";
 
-// define the request body type
-interface UpdateCustomerRequest {
+interface InputType {
   id: string;
   first_name?: string;
   last_name?: string;
@@ -15,7 +14,7 @@ interface UpdateCustomerRequest {
 
 // /store/customers/update/ - update a customer
 export async function POST(
-  req: MedusaRequest<UpdateCustomerRequest>,
+  req: MedusaRequest<InputType>,
   res: MedusaResponse
 ): Promise<void> {
   try {
@@ -28,7 +27,7 @@ export async function POST(
       gender,
       is_admin = false,
       is_driver = false,
-    } = req.body as UpdateCustomerRequest;
+    } = req.body as InputType;
 
     // validate required fields
     if (!id) {
@@ -63,22 +62,7 @@ export async function POST(
       },
     });
 
-    // return success response without sensitive data
-    res.status(201).json({
-      customer: {
-        id: result.customer.id,
-        email: result.customer.email,
-        first_name: result.customer.first_name,
-        last_name: result.customer.last_name,
-        phone: result.customer.phone,
-        created_at: result.customer.created_at,
-        dob: result.extendedCustomer.dob,
-        gender: result.extendedCustomer.gender,
-        is_admin: result.extendedCustomer.is_admin,
-        is_driver: result.extendedCustomer.is_driver,
-      },
-      message: "Customer updated successfully",
-    });
+    res.status(201).json(result);
   } catch (error) {
     console.error("Error updating customer:", error);
 

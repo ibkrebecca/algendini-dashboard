@@ -3,6 +3,7 @@ import {
   MedusaResponse,
   MedusaNextFunction,
 } from "@medusajs/framework/http";
+import { IS_PROD } from "../../lib/constants";
 
 export function corsMiddleware(
   req: MedusaRequest,
@@ -15,12 +16,11 @@ export function corsMiddleware(
   const LOCAL_APP_URL = process.env.LOCAL_APP_URL!;
   const APP_URL = process.env.APP_URL!;
 
-  const isProd = process.env.NODE_ENV === "production";
   const localOrigins = LOCAL_APP_URL.split(",").map((url) => url.trim());
   const prodOrigins = APP_URL!.split(",").map((url) => url.trim());
-  const allowedOrigins = isProd ? prodOrigins : localOrigins;
+  const allowedOrigins = IS_PROD ? prodOrigins : localOrigins;
 
-  const inLocal = !isProd && requestOrigin?.startsWith(process.env.APP_URL!);
+  const inLocal = !IS_PROD && requestOrigin?.startsWith(process.env.APP_URL!);
 
   if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
     allowedOrigin = requestOrigin;
@@ -29,7 +29,7 @@ export function corsMiddleware(
   } else {
     allowedOrigin = allowedOrigins[0];
 
-    if (isProd && requestOrigin) {
+    if (IS_PROD && requestOrigin) {
       console.warn(
         `CORS: Blocked origin ${requestOrigin} in production. Allowed: ${allowedOrigins.join(
           ", "

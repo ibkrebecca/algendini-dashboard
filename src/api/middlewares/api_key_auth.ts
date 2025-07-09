@@ -3,6 +3,7 @@ import {
   MedusaResponse,
   MedusaNextFunction,
 } from "@medusajs/framework/http";
+import { IS_PROD } from "../../lib/constants";
 
 declare module "@medusajs/framework/http" {
   interface MedusaRequest {
@@ -34,10 +35,9 @@ export function apiKeyAuth(
   const LOCAL_PUBLIC_KEY = process.env.LOCAL_PUBLIC_KEY!;
   const PUBLIC_KEY = process.env.PUBLIC_KEY!;
 
-  const isProd = process.env.NODE_ENV === "production";
   const localPublicKey = LOCAL_PUBLIC_KEY?.split(",") || [];
   const prodPublicKey = PUBLIC_KEY?.split(",") || [];
-  const publicKey = isProd ? prodPublicKey : localPublicKey;
+  const publicKey = IS_PROD ? prodPublicKey : localPublicKey;
 
   if (!publicKey.includes(apiKey)) {
     res.status(401).json({

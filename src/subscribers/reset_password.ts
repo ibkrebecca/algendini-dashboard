@@ -1,5 +1,6 @@
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/medusa";
 import { Modules } from "@medusajs/framework/utils";
+import { ADMIN_URL, STORE_URL } from "../lib/constants";
 
 export default async function resetPasswordTokenHandler({
   event: {
@@ -9,10 +10,6 @@ export default async function resetPasswordTokenHandler({
 }: SubscriberArgs<{ entity_id: string; token: string; actor_type: string }>) {
   const notificationModuleService = container.resolve(Modules.NOTIFICATION);
 
-  const NODE_ENV = process.env.NODE_ENV;
-
-  const ADMIN_URL = process.env.ADMIN_URL;
-  const STORE_URL = process.env.STORE_URL;
   const TEMPLATE_EN = process.env.SENDGRID_RESET_PASSWORD_TEMPLATE_EN!;
   const TEMPLATE_TR = process.env.SENDGRID_RESET_PASSWORD_TEMPLATE_TR!;
 
