@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveCategoriesWorkflow } from "../../../../workflows/categories/retrieve";
+import { retrieveProductsWorkflow } from "../../../../workflows/products/retrieve";
 
-// /store/categories/retrieve/ - retrieve all categories
+// /store/products/retrieve/ - retrieve all products
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
@@ -10,11 +10,11 @@ export async function GET(
     const { limit = 50, offset = 0, q, id } = req.query;
 
     // build filters
-    const filters: any = { is_active: true, is_internal: false };
-    if (q) filters.name = { $ilike: `%${q}%` };
+    const filters: any = { status: "published" };
+    if (q) filters.title = { $ilike: `%${q}%` };
     if (id) filters.id = id;
 
-    const { result: categories } = await retrieveCategoriesWorkflow(
+    const { result: products } = await retrieveProductsWorkflow(
       req.scope
     ).run({
       input: {
@@ -24,9 +24,9 @@ export async function GET(
       },
     });
 
-    res.json(categories);
+    res.json(products);
   } catch (error) {
-    console.error("Error retriving categories:", error);
+    console.error("Error retriving products:", error);
 
     if (error.message?.includes("not found")) {
       res.status(404).json({
@@ -37,7 +37,7 @@ export async function GET(
 
     res.status(500).json({
       error: "Internal Server Error",
-      message: "Failed to retrieve categories",
+      message: "Failed to retrieve products",
     });
   }
 }

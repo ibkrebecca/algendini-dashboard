@@ -16,6 +16,7 @@ const retrieveCustomer = createStep(
     const { data: categories, metadata: { count } = {} } = await query.graph({
       entity: "product_category",
       fields: [
+        "*",
         "id",
         "name",
         "description",
