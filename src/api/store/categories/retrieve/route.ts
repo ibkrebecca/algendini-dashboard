@@ -7,13 +7,11 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { limit = 50, offset = 0, q, is_active, is_internal } = req.query;
+    const { limit = 50, offset = 0, q } = req.query;
 
     // build filters
-    const filters: any = {};
+    const filters: any = { is_active: true, is_internal: false };
     if (q) filters.name = { $ilike: `%${q}%` };
-    if (is_active !== undefined) filters.is_active = is_active === "true";
-    if (is_internal !== undefined) filters.is_internal = is_internal === "true";
 
     const { result: categories } = await retrieveCategoriesWorkflow(
       req.scope
