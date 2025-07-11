@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { sdk } from "../lib/config";
 import { Thumbnail } from "../components/thumbnail";
 import { FilePreview } from "../components/file/file-preview";
+import { JsonView } from "./json_view";
 
 type AdminCustomerExtended = AdminCustomer & {
   extended_customer?: {
@@ -79,80 +80,87 @@ const ExtendedCustomerWidget = ({
       });
     }
 
-    const data = await res.json();
-    console.log(data);
+    toast.success("Success", {
+      description: checked
+        ? "Customer is now a driver."
+        : "Customer is not longer a driver.",
+    });
   };
 
   return (
-    <UiContainer>
-      <Header title="Others" />
+    <>
+      <UiContainer>
+        <Header title="Others" />
 
-      <div className="flex flex-col gap-y-4 px-6 py-4">
-        <div>
-          <Text className="mb-2">Avatar</Text>
+        <div className="flex flex-col gap-y-4 px-6 py-4">
+          <div>
+            <Text className="mb-2">Avatar</Text>
 
-          <div className="flex items-center gap-x-5">
-            <Thumbnail src={avatar} alt="avatar image" size="large" />
+            <div className="flex items-center gap-x-5">
+              <Thumbnail src={avatar} alt="avatar image" size="large" />
 
-            <FilePreview
-              className="w-full"
-              filename="avatar image file"
-              url={avatar}
+              <FilePreview
+                className="w-full"
+                filename="avatar image file"
+                url={avatar}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Text className="mb-2">Date Of Birth</Text>
+            <DatePicker
+              key={dob.toDateString() || "default"}
+              isReadOnly
+              isDisabled
+              value={dob}
+              label="Date Of Birth"
             />
           </div>
+
+          <div>
+            <Text className="mb-2">Gender</Text>
+
+            <Select defaultValue={gender} value={gender}>
+              <Select.Trigger>
+                <Select.Value placeholder="Select a gender" />
+              </Select.Trigger>
+
+              <Select.Content>
+                {["male", "female"].map((i) => (
+                  <Select.Item key={i} value={i}>
+                    {i}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select>
+          </div>
+
+          <hr className="my-4" />
+
+          <div className="flex items-center justify-between gap-x-2">
+            <Label htmlFor="manage-driver">Is Customer A Driver?</Label>
+            <Switch
+              id="manage-driver"
+              checked={isDriver}
+              onCheckedChange={onDriverChange}
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-x-2">
+            <Label htmlFor="manage-admin">Is Customer Administrator?</Label>
+            <Switch id="manage-admin" disabled defaultChecked={isAdmin} />
+          </div>
         </div>
+      </UiContainer>
 
-        <div>
-          <Text className="mb-2">Date Of Birth</Text>
-          <DatePicker
-            key={dob.toDateString() || "default"}
-            isReadOnly
-            isDisabled
-            value={dob}
-            label="Date Of Birth"
-          />
-        </div>
-
-        <div>
-          <Text className="mb-2">Gender</Text>
-
-          <Select defaultValue={gender} value={gender}>
-            <Select.Trigger>
-              <Select.Value placeholder="Select a gender" />
-            </Select.Trigger>
-
-            <Select.Content>
-              {["male", "female"].map((i) => (
-                <Select.Item key={i} value={i}>
-                  {i}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
-        </div>
-
-        <hr className="my-4" />
-
-        <div className="flex items-center justify-between gap-x-2">
-          <Label htmlFor="manage-driver">Is Customer A Driver?</Label>
-          <Switch
-            id="manage-driver"
-            checked={isDriver}
-            onCheckedChange={onDriverChange}
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-x-2">
-          <Label htmlFor="manage-admin">Is Customer Administrator?</Label>
-          <Switch id="manage-admin" disabled defaultChecked={isAdmin} />
-        </div>
-      </div>
-    </UiContainer>
+      <JsonView data={extended || {}} title="EXTENDED JSON" />
+    </>
   );
 };
 
 export const config = defineWidgetConfig({
-  zone: "customer.details.side.before",
+  zone: "customer.details.side.after",
 });
 
 export default ExtendedCustomerWidget;

@@ -12,6 +12,7 @@ import { FilePreview } from "../components/file/file-preview";
 import { Thumbnail } from "../components/thumbnail";
 import { useQuery } from "@tanstack/react-query";
 import { sdk } from "../lib/config";
+import { JsonView } from "./json_view";
 
 type AdminProductCategoryExtended = AdminProductCategory & {
   extended_product_category?: {
@@ -128,42 +129,46 @@ const ExtendedProductCategoryWidget = ({
   };
 
   return (
-    <UiContainer>
-      <Header title="Image" />
+    <>
+      <UiContainer>
+        <Header title="Image" />
 
-      <div className="flex flex-col gap-y-4 px-6 py-4">
-        <FileUpload
-          label="Category Image"
-          hint="select category image"
-          formats={["jpg", "jpeg", "png"]}
-          multiple={false}
-          onUploaded={onImageChange}
-        />
+        <div className="flex flex-col gap-y-4 px-6 py-4">
+          <FileUpload
+            label="Category Image"
+            hint="select category image"
+            formats={["jpg", "jpeg", "png"]}
+            multiple={false}
+            onUploaded={onImageChange}
+          />
 
-        {(image || file) && (
-          <div className="flex items-center gap-x-5">
-            {image && (
-              <Thumbnail src={image} alt="category image" size="large" />
-            )}
+          {(image || file) && (
+            <div className="flex items-center gap-x-5">
+              {image && (
+                <Thumbnail src={image} alt="category image" size="large" />
+              )}
 
-            <FilePreview
-              className="w-full"
-              filename="category image file"
-              url={image ?? file?.name}
-            />
-          </div>
-        )}
+              <FilePreview
+                className="w-full"
+                filename="category image file"
+                url={image ?? file?.name}
+              />
+            </div>
+          )}
 
-        <Button onClick={onImageUpload} disabled={saving || !file}>
-          {saving ? "Saving..." : "Save"}
-        </Button>
-      </div>
-    </UiContainer>
+          <Button onClick={onImageUpload} disabled={saving || !file}>
+            {saving ? "Saving..." : "Save"}
+          </Button>
+        </div>
+      </UiContainer>
+
+      <JsonView data={extended || {}} title="EXTENDED JSON" />
+    </>
   );
 };
 
 export const config = defineWidgetConfig({
-  zone: "product_category.details.side.before",
+  zone: "product_category.details.side.after",
 });
 
 export default ExtendedProductCategoryWidget;
