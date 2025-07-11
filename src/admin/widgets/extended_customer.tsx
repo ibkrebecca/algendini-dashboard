@@ -1,0 +1,158 @@
+import { defineWidgetConfig } from "@medusajs/admin-sdk";
+import { AdminCustomer, DetailWidgetProps } from "@medusajs/framework/types";
+import { Text, Select, DatePicker, Switch, Label, toast } from "@medusajs/ui";
+import { useEffect, useState } from "react";
+import { Header } from "../components/header";
+import { Container as UiContainer } from "../components/container";
+import { useQuery } from "@tanstack/react-query";
+import { sdk } from "../lib/config";
+import { Thumbnail } from "../components/thumbnail";
+import { FilePreview } from "../components/file/file-preview";
+
+type AdminCustomerExtended = AdminCustomer & {
+  extended_customer?: {
+    avatar_url?: string;
+    dob?: string;
+    gender?: string;
+    is_admin?: boolean;
+    is_driver?: boolean;
+  };
+};
+
+// the extended customer widget
+const ExtendedCustomerWidget = ({
+  data: customer,
+}: DetailWidgetProps<AdminCustomerExtended>) => {
+  const { data: qr } = useQuery({
+    queryFn: () =>
+      sdk.admin.customer.retrieve(customer.id, {
+        fields: "+extended_customer.*",
+      }),
+    queryKey: [["customer", customer.id]],
+  });
+
+  const cat = qr?.customer as AdminCustomerExtended;
+  const extended = cat?.extended_customer;
+
+  const [avatar, setAvatar] = useState("");
+  const [dob, setDob] = useState(new Date());
+  const [gender, setGender] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isDriver, setIsDriver] = useState(false);
+
+  useEffect(() => {
+    if (extended) {
+      setAvatar(extended.avatar_url || "");
+      setDob(extended.dob ? new Date(extended.dob) : new Date());
+      setGender(extended.gender || "");
+      setIsAdmin(extended.is_admin || false);
+      setIsDriver(extended.is_driver || false);
+    }
+  }, [extended]);
+
+  const IS_PROD = import.meta.env.PROD;
+  const STORE_URL = import.meta.env.VITE_STORE_URL;
+  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
+  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
+
+  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
+  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
+  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
+
+  const onDriverChange = async (checked: boolean) => {
+    setIsDriver(checked);
+    const url = `${BASE_URL}/store/customers/update`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": P_KEY,
+      },
+      body: JSON.stringify({ id: customer.id, is_driver: checked }),
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      toast.error("Error", {
+        description: "Failed to update driver state.",
+      });
+    }
+
+    const data = await res.json();
+    console.log(data);
+  };
+
+  return (
+    <UiContainer>
+      <Header title="Others" />
+
+      <div className="flex flex-col gap-y-4 px-6 py-4">
+        <div>
+          <Text className="mb-2">Avatar</Text>
+
+          <div className="flex items-center gap-x-5">
+            <Thumbnail src={avatar} alt="avatar image" size="large" />
+
+            <FilePreview
+              className="w-full"
+              filename="avatar image file"
+              url={avatar}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Text className="mb-2">Date Of Birth</Text>
+          <DatePicker
+            key={dob.toDateString() || "default"}
+            isReadOnly
+            isDisabled
+            value={dob}
+            label="Date Of Birth"
+          />
+        </div>
+
+        <div>
+          <Text className="mb-2">Gender</Text>
+
+          <Select defaultValue={gender} value={gender}>
+            <Select.Trigger>
+              <Select.Value placeholder="Select a gender" />
+            </Select.Trigger>
+
+            <Select.Content>
+              {["male", "female"].map((i) => (
+                <Select.Item key={i} value={i}>
+                  {i}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select>
+        </div>
+
+        <hr className="my-4" />
+
+        <div className="flex items-center justify-between gap-x-2">
+          <Label htmlFor="manage-driver">Is Customer A Driver?</Label>
+          <Switch
+            id="manage-driver"
+            checked={isDriver}
+            onCheckedChange={onDriverChange}
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-x-2">
+          <Label htmlFor="manage-admin">Is Customer Administrator?</Label>
+          <Switch id="manage-admin" disabled defaultChecked={isAdmin} />
+        </div>
+      </div>
+    </UiContainer>
+  );
+};
+
+export const config = defineWidgetConfig({
+  zone: "customer.details.side.before",
+});
+
+export default ExtendedCustomerWidget;

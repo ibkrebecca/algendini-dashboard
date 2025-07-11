@@ -1,6 +1,6 @@
 import { ArrowDownTray, Spinner } from "@medusajs/icons";
 import { IconButton, Text } from "@medusajs/ui";
-import { ActionGroup, ActionMenu } from "./action-menu";
+import { ActionGroup, ActionMenu } from "../action_menu";
 
 export const FilePreview = ({
   filename,

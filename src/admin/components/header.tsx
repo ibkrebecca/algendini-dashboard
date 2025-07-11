@@ -1,7 +1,7 @@
 import { Heading, Button, Text } from "@medusajs/ui";
 import React from "react";
 import { Link, LinkProps } from "react-router-dom";
-import { ActionMenu, ActionMenuProps } from "./action-menu";
+import { ActionMenu, ActionMenuProps } from "./action_menu";
 
 export type HeadingProps = {
   title: string;

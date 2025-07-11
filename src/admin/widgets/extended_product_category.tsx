@@ -4,17 +4,17 @@ import {
   DetailWidgetProps,
 } from "@medusajs/framework/types";
 import { Button, toast } from "@medusajs/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "../components/header";
 import { Container as UiContainer } from "../components/container";
-import { FileType, FileUpload } from "../components/file-upload";
-import { FilePreview } from "../components/file-preview";
+import { FileType, FileUpload } from "../components/file/file-upload";
+import { FilePreview } from "../components/file/file-preview";
 import { Thumbnail } from "../components/thumbnail";
 import { useQuery } from "@tanstack/react-query";
 import { sdk } from "../lib/config";
 
 type AdminProductCategoryExtended = AdminProductCategory & {
-  extended?: {
+  extended_product_category?: {
     image?: string;
   };
 };
@@ -31,12 +31,16 @@ const ExtendedProductCategoryWidget = ({
     queryKey: [["product_category", category.id]],
   });
 
-  const ex = (qr?.product_category as AdminProductCategoryExtended)?.extended;
-  console.log("ex", ex);
+  const cat = qr?.product_category as AdminProductCategoryExtended;
+  const extended = cat?.extended_product_category;
 
-  const [image, setImage] = useState(ex?.image || "");
+  const [image, setImage] = useState(extended?.image);
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (extended?.image) setImage(extended.image);
+  }, [extended?.image]);
 
   const IS_PROD = import.meta.env.PROD;
   const STORE_URL = import.meta.env.VITE_STORE_URL;
@@ -137,14 +141,14 @@ const ExtendedProductCategoryWidget = ({
         />
 
         {(image || file) && (
-          <div className="flex items-center gap-x-4">
+          <div className="flex items-center gap-x-5">
             {image && (
               <Thumbnail src={image} alt="category image" size="large" />
             )}
 
             <FilePreview
               className="w-full"
-              filename={`Category Image ${file ? `(${file?.name})` : ""}`}
+              filename="category image file"
               url={image ?? file?.name}
             />
           </div>

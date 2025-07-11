@@ -105,17 +105,6 @@ const customer_apis: Array<any> = [
 
 const product_apis: Array<any> = [
   {
-    matcher: "/admin/product-categories/:id",
-    method: "GET",
-    middlewares: [
-      (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
-        req.allowed?.push("extended_product_category");
-        next();
-      },
-    ],
-  },
-
-  {
     matcher: "/store/(products|categories)*",
     method: ["GET"],
     middlewares: [corsMiddleware, apiKeyAuth, rateLimit(200, 15 * 60 * 1000)],
@@ -134,6 +123,26 @@ const product_apis: Array<any> = [
 
 export default defineMiddlewares({
   routes: [
+    {
+      matcher: "/admin/product-categories/:id",
+      middlewares: [
+        (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+          (req.allowed ??= []).push("extended_product_category");
+          next();
+        },
+      ],
+    },
+
+    {
+      matcher: "/admin/customers/:id",
+      middlewares: [
+        (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+          (req.allowed ??= []).push("extended_customer");
+          next();
+        },
+      ],
+    },
+
     {
       matcher: "/store/upload/single_image",
       method: "POST",
