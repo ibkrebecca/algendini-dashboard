@@ -27,7 +27,7 @@ export async function GET(
     const { result: products } = await retrieveProductsWorkflow(req.scope).run({
       input: {
         filters,
-        orderObj,
+        order: orderObj,
         skip: random ? randomSkip : skipNum,
         take: takeNum,
       },

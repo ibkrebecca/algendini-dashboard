@@ -34,6 +34,7 @@ const retrieveCustomer = createStep(
         "shipping_profile.*",
         "type.*",
         "metadata.*",
+        "extended_product.*",
       ],
       filters: input.filters,
       context: {

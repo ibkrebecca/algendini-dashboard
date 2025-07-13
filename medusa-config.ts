@@ -110,6 +110,19 @@ const getSendEmail = () => {
   };
 };
 
+const getExtendedModel = () => {
+  return [
+    {
+      resolve: "./src/modules/customer",
+    },
+    {
+      resolve: "./src/modules/product",
+    },
+    {
+      resolve: "./src/modules/product_category",
+    },
+  ];
+};
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: databaseUrl,
@@ -139,15 +152,5 @@ module.exports = defineConfig({
       jwtExpiresIn: JWT_EXPIRES_IN || "7d",
     },
   },
-  modules: [
-    getEmailPass(),
-    getBucket(),
-    getSendEmail(),
-    {
-      resolve: "./src/modules/customer",
-    },
-    {
-      resolve: "./src/modules/product_category",
-    },
-  ],
+  modules: [getEmailPass(), getBucket(), getSendEmail(), ...getExtendedModel()],
 });
