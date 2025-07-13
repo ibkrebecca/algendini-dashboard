@@ -7,20 +7,29 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { limit = 50, offset = 0, q, id } = req.query;
+    const { order, skip = 0, take = 50, q, id, random } = req.query;
+    const orderObj = JSON.parse((order as string) || "{}");
+
+    const skipNum = parseInt(skip as string) || 0;
+    const takeNum = parseInt(take as string) || 50;
+
+    const service = req.scope.resolve("product");
+    const [, count] = await service.listAndCountProducts();
+
+    const maxSkip = Math.max(count - takeNum, 0);
+    const randomSkip = Math.floor(Math.random() * (maxSkip + 1));
 
     // build filters
     const filters: any = { status: "published" };
     if (q) filters.title = { $ilike: `%${q}%` };
     if (id) filters.id = id;
 
-    const { result: products } = await retrieveProductsWorkflow(
-      req.scope
-    ).run({
+    const { result: products } = await retrieveProductsWorkflow(req.scope).run({
       input: {
         filters,
-        limit,
-        offset,
+        orderObj,
+        skip: random ? randomSkip : skipNum,
+        take: takeNum,
       },
     });
 

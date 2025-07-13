@@ -5,7 +5,10 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import {
+  ContainerRegistrationKeys,
+  QueryContext,
+} from "@medusajs/framework/utils";
 
 // retrieve products
 const retrieveCustomer = createStep(
@@ -18,18 +21,33 @@ const retrieveCustomer = createStep(
       fields: [
         "*",
         "variants.*",
+        "variants.prices.*",
+        "variants.calculated_price.*",
+        "variants.options.*",
+        "variants.inventory_items.*",
         "options.*",
         "images.*",
         "tags.*",
         "categories.*",
         "collection.*",
+        "sales_channels.*",
+        "shipping_profile.*",
         "type.*",
         "metadata.*",
       ],
       filters: input.filters,
+      context: {
+        variants: {
+          calculated_price: QueryContext({
+            region_id: "reg_01JS9A6Y581Q4X0VS5DXDQS49F", // TODO: change id in prod
+            currency_code: "try",
+          }),
+        },
+      },
       pagination: {
-        skip: parseInt(input.offset as string),
-        take: parseInt(input.limit as string),
+        order: input.order,
+        skip: input.skip,
+        take: input.take,
       },
     });
 
@@ -37,8 +55,9 @@ const retrieveCustomer = createStep(
     return new StepResponse({
       products,
       count,
-      offset: parseInt(input.offset as string),
-      limit: parseInt(input.limit as string),
+      order: input.order,
+      skip: input.skip,
+      take: input.take,
     });
   }
 );

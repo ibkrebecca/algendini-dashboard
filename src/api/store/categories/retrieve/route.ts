@@ -7,7 +7,10 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { limit = 50, offset = 0, q, id } = req.query;
+    const { skip = 0, take = 50, q, id } = req.query;
+
+    const skipNum = parseInt(skip as string) || 0;
+    const takeNum = parseInt(take as string) || 50;
 
     // build filters
     const filters: any = { is_active: true, is_internal: false };
@@ -19,8 +22,8 @@ export async function GET(
     ).run({
       input: {
         filters,
-        limit,
-        offset,
+        skip: skipNum,
+        take: takeNum,
       },
     });
 

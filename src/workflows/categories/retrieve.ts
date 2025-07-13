@@ -34,8 +34,8 @@ const retrieveCustomer = createStep(
       ],
       filters: input.filters,
       pagination: {
-        skip: parseInt(input.offset as string),
-        take: parseInt(input.limit as string),
+        skip: input.skip,
+        take: input.take,
       },
     });
 
@@ -43,8 +43,8 @@ const retrieveCustomer = createStep(
     return new StepResponse({
       categories,
       count,
-      offset: parseInt(input.offset as string),
-      limit: parseInt(input.limit as string),
+      skip: input.skip,
+      take: input.take,
     });
   }
 );
