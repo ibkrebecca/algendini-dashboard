@@ -40,7 +40,7 @@ export async function GET(
     if (error.message?.includes("not found")) {
       res.status(404).json({
         error: "Not Found",
-        message: "Customer not found",
+        message: "Product not found",
       });
     }
 

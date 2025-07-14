@@ -107,7 +107,7 @@ const product_apis: Array<any> = [
   {
     matcher: "/store/(products|categories)*",
     method: ["GET"],
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(200, 15 * 60 * 1000)],
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(500, 15 * 60 * 1000)],
   },
 
   {
@@ -152,6 +152,26 @@ export default defineMiddlewares({
         rateLimit(10, 15 * 60 * 1000),
         upload.single("image"),
       ],
+    },
+
+    {
+      matcher: "/store/xchange/retrieve",
+      method: "GET",
+      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(500, 15 * 60 * 1000)],
+    },
+
+    {
+      matcher: "/store/xchange/update",
+      method: "POST",
+      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
+      additionalDataValidator: {
+        id: z.string(),
+        usd: z.string(),
+        gbp: z.string(),
+        eur: z.string(),
+        try: z.string(),
+        created_on: z.string().datetime(),
+      },
     },
 
     ...customer_apis,
