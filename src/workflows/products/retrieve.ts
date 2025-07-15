@@ -26,6 +26,7 @@ const retrieveProduct = createStep(
         "variants.options.*",
         "variants.inventory_items.*",
         "options.*",
+        "options.values.*",
         "images.*",
         "tags.*",
         "categories.*",
