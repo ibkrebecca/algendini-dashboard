@@ -28,7 +28,7 @@ export async function POST(
 
     // validate created_on format if provided
     if (created_on) {
-      const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
+      const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z?$/;
       if (!dateRegex.test(created_on)) {
         res.status(400).json({
           error: "Bad Request",

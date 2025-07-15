@@ -106,8 +106,8 @@ const customer_apis: Array<any> = [
 const product_apis: Array<any> = [
   {
     matcher: "/store/(products|categories)*",
-    method: ["GET"],
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(500, 15 * 60 * 1000)],
+    method: "GET",
+    middlewares: [corsMiddleware, apiKeyAuth],
   },
 
   {
@@ -157,19 +157,19 @@ export default defineMiddlewares({
     {
       matcher: "/store/xchange/retrieve",
       method: "GET",
-      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(500, 15 * 60 * 1000)],
+      middlewares: [corsMiddleware, apiKeyAuth],
     },
 
     {
       matcher: "/store/xchange/update",
       method: "POST",
-      middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
+      middlewares: [corsMiddleware, apiKeyAuth],
       additionalDataValidator: {
         id: z.string(),
         usd: z.string(),
         gbp: z.string(),
         eur: z.string(),
-        try: z.string(),
+        lira: z.string(),
         created_on: z.string().datetime(),
       },
     },
