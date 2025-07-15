@@ -22,7 +22,13 @@ const updateXchange = createStep(
   async (input: InputType, { container }) => {
     const xchangeService: XchangeService = container.resolve(XCHANGE_MODULE);
 
-    const exist = await xchangeService.retrieveXchange(input.id);
+    let exist: any = null;
+    try {
+      exist = await xchangeService.retrieveXchange(input.id);
+    } catch (_) {
+      exist = null;
+    }
+
     if (!exist) {
       await xchangeService.createXchanges({
         id: input.id,
