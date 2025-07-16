@@ -55,8 +55,6 @@ const ExtendedProductWidget = ({
   const hasLen = features.length === 1;
   const isEmpty = hasLen && Object.keys(features[0]).length === 0;
 
-  console.log(features);
-
   const onUpdate = async () => {
     setSaving(true);
     const url = `${BASE_URL}/store/products/update`;
@@ -77,9 +75,6 @@ const ExtendedProductWidget = ({
       });
       setSaving(false);
     }
-
-    const data = await res.json();
-    console.log(data);
 
     toast.success("Success", {
       description: "Product features updated.",
