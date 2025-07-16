@@ -16,6 +16,70 @@ import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const general_apis: Array<any> = [
+  {
+    matcher: "/admin/products/:id",
+    method: ["GET", "PUT", "PATCH", "DELETE"],
+    middlewares: [
+      (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+        (req.allowed ??= []).push("extended_product");
+        next();
+      },
+    ],
+  },
+
+  {
+    matcher: "/admin/product-categories/:id",
+    middlewares: [
+      (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+        (req.allowed ??= []).push("extended_product_category");
+        next();
+      },
+    ],
+  },
+
+  {
+    matcher: "/admin/customers/:id",
+    middlewares: [
+      (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+        (req.allowed ??= []).push("extended_customer");
+        next();
+      },
+    ],
+  },
+
+  {
+    matcher: "/store/upload/single_image",
+    method: "POST",
+    middlewares: [
+      corsMiddleware,
+      apiKeyAuth,
+      rateLimit(10, 15 * 60 * 1000),
+      upload.single("image"),
+    ],
+  },
+
+  {
+    matcher: "/store/xchange/retrieve",
+    method: "GET",
+    middlewares: [corsMiddleware, apiKeyAuth],
+  },
+
+  {
+    matcher: "/store/xchange/update",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth],
+    additionalDataValidator: {
+      id: z.string(),
+      usd: z.string(),
+      gbp: z.string(),
+      eur: z.string(),
+      lira: z.string(),
+      created_on: z.string().datetime(),
+    },
+  },
+];
+
 const customer_apis: Array<any> = [
   {
     matcher: "/store/customers/register",
@@ -119,62 +183,21 @@ const product_apis: Array<any> = [
       url: z.string(),
     },
   },
+
+  {
+    matcher: "/store/products/update",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      id: z.string(),
+      view_count: z.number().optional(),
+      features: z
+        .array(z.object({ title: z.string(), value: z.string() }))
+        .optional(),
+    },
+  },
 ];
 
 export default defineMiddlewares({
-  routes: [
-    {
-      matcher: "/admin/product-categories/:id",
-      middlewares: [
-        (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
-          (req.allowed ??= []).push("extended_product_category");
-          next();
-        },
-      ],
-    },
-
-    {
-      matcher: "/admin/customers/:id",
-      middlewares: [
-        (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
-          (req.allowed ??= []).push("extended_customer");
-          next();
-        },
-      ],
-    },
-
-    {
-      matcher: "/store/upload/single_image",
-      method: "POST",
-      middlewares: [
-        corsMiddleware,
-        apiKeyAuth,
-        rateLimit(10, 15 * 60 * 1000),
-        upload.single("image"),
-      ],
-    },
-
-    {
-      matcher: "/store/xchange/retrieve",
-      method: "GET",
-      middlewares: [corsMiddleware, apiKeyAuth],
-    },
-
-    {
-      matcher: "/store/xchange/update",
-      method: "POST",
-      middlewares: [corsMiddleware, apiKeyAuth],
-      additionalDataValidator: {
-        id: z.string(),
-        usd: z.string(),
-        gbp: z.string(),
-        eur: z.string(),
-        lira: z.string(),
-        created_on: z.string().datetime(),
-      },
-    },
-
-    ...customer_apis,
-    ...product_apis,
-  ],
+  routes: [...general_apis, ...customer_apis, ...product_apis],
 });

@@ -156,9 +156,11 @@ const ExtendedProductCategoryWidget = ({
             </div>
           )}
 
-          <Button onClick={onImageUpload} disabled={saving || !file}>
-            {saving ? "Saving..." : "Save"}
-          </Button>
+          <div className="flex justify-end">
+            <Button onClick={onImageUpload} disabled={saving || !file}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
       </UiContainer>
 

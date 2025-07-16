@@ -1,7 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { EXTENDED_PRODUCT_CATEGORY_MODULE } from "../../../../modules/product_category";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
-import { container } from "@medusajs/framework";
 
 // define the request body type
 interface UpdateProductCategoryRequest {
@@ -18,7 +17,6 @@ export async function POST(
     EXTENDED_PRODUCT_CATEGORY_MODULE
   );
 
-  const link = req.scope.resolve(ContainerRegistrationKeys.LINK);
   const { id, url } = req.body as UpdateProductCategoryRequest;
 
   // validate required fields

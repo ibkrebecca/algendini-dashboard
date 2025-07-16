@@ -32,8 +32,8 @@ const ExtendedCustomerWidget = ({
     queryKey: [["customer", customer.id]],
   });
 
-  const cat = qr?.customer as AdminCustomerExtended;
-  const extended = cat?.extended_customer;
+  const cus = qr?.customer as AdminCustomerExtended;
+  const extended = cus?.extended_customer;
 
   const [avatar, setAvatar] = useState("");
   const [dob, setDob] = useState(new Date());

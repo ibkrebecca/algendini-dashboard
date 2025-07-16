@@ -8,7 +8,7 @@ import {
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 // retrieve categories
-const retrieveCustomer = createStep(
+const retrieveCategories = createStep(
   "retrieve_categories",
   async (input: any, { container }) => {
     const query = container.resolve(ContainerRegistrationKeys.QUERY);
@@ -53,7 +53,7 @@ const retrieveCustomer = createStep(
 export const retrieveCategoriesWorkflow = createWorkflow(
   "retrieve_categories_workflow",
   function (input) {
-    const categories = retrieveCustomer(input);
+    const categories = retrieveCategories(input);
 
     return new WorkflowResponse(categories);
   }
