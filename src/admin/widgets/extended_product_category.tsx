@@ -24,6 +24,15 @@ type AdminProductCategoryExtended = AdminProductCategory & {
 const ExtendedProductCategoryWidget = ({
   data: category,
 }: DetailWidgetProps<AdminProductCategoryExtended>) => {
+  const IS_PROD = import.meta.env.PROD;
+  const STORE_URL = import.meta.env.VITE_STORE_URL;
+  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
+  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
+
+  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
+  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
+  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
+
   const { data: qr } = useQuery({
     queryFn: () =>
       sdk.admin.productCategory.retrieve(category.id, {
@@ -42,15 +51,6 @@ const ExtendedProductCategoryWidget = ({
   useEffect(() => {
     if (extended?.image) setImage(extended.image);
   }, [extended?.image]);
-
-  const IS_PROD = import.meta.env.PROD;
-  const STORE_URL = import.meta.env.VITE_STORE_URL;
-  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
-  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
-
-  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
-  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
 
   const onImageChange = (files: FileType[]) => {
     if (files.length > 0) setFile(files[0].file);

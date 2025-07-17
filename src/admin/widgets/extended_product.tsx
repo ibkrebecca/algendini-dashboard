@@ -1,17 +1,32 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { AdminProduct, DetailWidgetProps } from "@medusajs/framework/types";
-import { Button, toast } from "@medusajs/ui";
+import {
+  Button,
+  Drawer,
+  DropdownMenu,
+  IconButton,
+  Prompt,
+  Table,
+  toast,
+} from "@medusajs/ui";
 import { useEffect, useState } from "react";
 import { Header } from "../components/header";
 import { Container as UiContainer } from "../components/container";
 import { useQuery } from "@tanstack/react-query";
 import { sdk } from "../lib/config";
 import { JsonView } from "./json_view";
+import { EllipsisHorizontal, PencilSquare, Trash } from "@medusajs/icons";
+
+type Feature = {
+  id: string;
+  title: string;
+  value: string;
+};
 
 type AdminProductExtended = AdminProduct & {
   extended_product?: {
     view_count?: number;
-    features?: object[];
+    features?: Feature[];
   };
 };
 
@@ -19,6 +34,15 @@ type AdminProductExtended = AdminProduct & {
 const ExtendedProductWidget = ({
   data: product,
 }: DetailWidgetProps<AdminProductExtended>) => {
+  const IS_PROD = import.meta.env.PROD;
+  const STORE_URL = import.meta.env.VITE_STORE_URL;
+  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
+  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
+
+  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
+  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
+  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
+
   const { data: qr } = useQuery({
     queryFn: () =>
       sdk.admin.product.retrieve(product.id, {
@@ -30,73 +54,205 @@ const ExtendedProductWidget = ({
   const prod = qr?.product as AdminProductExtended;
   const extended = prod?.extended_product;
 
-  const [features, setFeatures] = useState([{}]);
+  const [features, setFeatures] = useState<Feature[]>([]);
   const [saving, setSaving] = useState(false);
+
+  const [deleteFeature, setDeleteFeature] = useState<number | null>(null);
+  const [editFeature, setEditFeature] = useState<number | null>(null);
+  const [tableIndex, setTableIndex] = useState(0);
+  const tableSize = 10;
 
   useEffect(() => {
     if (extended) {
       setFeatures(
         Array.isArray(extended.features) && extended.features.length > 0
-          ? (extended.features as { title: string; value: string }[])
+          ? (extended.features as Feature[])
           : []
       );
     }
   }, [extended]);
 
-  const IS_PROD = import.meta.env.PROD;
-  const STORE_URL = import.meta.env.VITE_STORE_URL;
-  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
-  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
-
-  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
-  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
-
   const hasLen = features.length === 1;
   const isEmpty = hasLen && Object.keys(features[0]).length === 0;
 
-  const onUpdate = async () => {
+  const tableCount = Math.ceil(features.length / tableSize);
+  const canNextTable = tableIndex < tableCount - 1;
+  const canPrevTable = tableIndex > 0;
+
+  const nextTable = () => {
+    if (canNextTable) setTableIndex(tableIndex + 1);
+  };
+
+  const prevTable = () => {
+    if (canPrevTable) setTableIndex(tableIndex - 1);
+  };
+
+  const onUpdate = async (isEdit: boolean) => {
     setSaving(true);
-    const url = `${BASE_URL}/store/products/update`;
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-publishable-api-key": P_KEY,
-      },
-      body: JSON.stringify({ id: product.id, features: features }),
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      toast.error("Error", {
-        description: "Failed to update product features.",
-      });
-      setSaving(false);
+    if (isEdit) {
+    } else {
+      // const url = `${BASE_URL}/store/products/update`;
+      // const res = await fetch(url, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     "x-publishable-api-key": P_KEY,
+      //   },
+      //   body: JSON.stringify({ id: product.id, features: features }),
+      //   credentials: "include",
+      // });
+      // if (!res.ok) {
+      //   toast.error("Error", {
+      //     description: "Failed to update product features.",
+      //   });
+      //   setSaving(false);
+      // }
+      // toast.success("Success", {
+      //   description: "Product features updated.",
+      // });
+      // setSaving(false);
     }
-
-    toast.success("Success", {
-      description: "Product features updated.",
-    });
-    setSaving(false);
   };
 
   return (
     <>
-      <UiContainer>
-        <Header title="Features" />
+      <UiContainer className="pb-4">
+        <Header
+          title="Features"
+          actions={[
+            {
+              type: "button",
+              props: {
+                children: "Create",
+                variant: "secondary",
+                onClick: () => setEditFeature(0),
+              },
+            },
+          ]}
+        />
 
-        <div className="flex flex-col gap-y-4 px-6 py-4">
-          <div className="flex justify-end">
-            <Button onClick={onUpdate} disabled={saving || isEmpty}>
-              {saving ? "Saving..." : "Save"}
-            </Button>
-          </div>
+        <div className="flex h-full flex-col overflow-hidden !border-t-0">
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Title</Table.HeaderCell>
+                <Table.HeaderCell>Value</Table.HeaderCell>
+                <Table.HeaderCell className="text-right"></Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+
+            <Table.Body>
+              {!isEmpty &&
+                features.map((feature, index) => {
+                  const id = index + 1;
+
+                  return (
+                    <Table.Row key={id}>
+                      <Table.Cell>{feature.title}</Table.Cell>
+                      <Table.Cell>{feature.value}</Table.Cell>
+
+                      <Table.Cell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenu.Trigger asChild>
+                            <IconButton variant="transparent">
+                              <EllipsisHorizontal className="text-ui-fg-subtle" />
+                            </IconButton>
+                          </DropdownMenu.Trigger>
+
+                          <DropdownMenu.Content>
+                            <DropdownMenu.Item
+                              className="gap-x-2"
+                              onClick={() => setEditFeature(id)}
+                            >
+                              <PencilSquare className="text-ui-fg-subtle" />
+                              Edit
+                            </DropdownMenu.Item>
+
+                            <DropdownMenu.Separator />
+
+                            <DropdownMenu.Item
+                              className="gap-x-2"
+                              onClick={() => setDeleteFeature(id)}
+                            >
+                              <Trash className="text-ui-fg-subtle" />
+                              Delete
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu>
+                      </Table.Cell>
+                    </Table.Row>
+                  );
+                })}
+            </Table.Body>
+          </Table>
+
+          <Table.Pagination
+            pageCount={tableCount}
+            canNextPage={canNextTable}
+            canPreviousPage={canPrevTable}
+            count={features.length}
+            pageSize={tableSize}
+            pageIndex={tableIndex}
+            nextPage={nextTable}
+            previousPage={prevTable}
+          />
         </div>
       </UiContainer>
 
       <JsonView data={extended || {}} title="EXTENDED JSON" />
+
+      <Prompt
+        open={deleteFeature != null}
+        onOpenChange={() => setDeleteFeature(null)}
+      >
+        <Prompt.Trigger asChild />
+        <Prompt.Content>
+          <Prompt.Header>
+            <Prompt.Title>Are you sure?</Prompt.Title>
+
+            <Prompt.Description>
+              You are about to delete the feature. This action cannot be undone.
+            </Prompt.Description>
+          </Prompt.Header>
+
+          <Prompt.Footer>
+            <Prompt.Cancel>Cancel</Prompt.Cancel>
+            <Prompt.Action>Delete</Prompt.Action>
+          </Prompt.Footer>
+        </Prompt.Content>
+      </Prompt>
+
+      <Drawer
+        open={editFeature != null}
+        onOpenChange={() => setEditFeature(null)}
+      >
+        <Drawer.Trigger asChild />
+        <Drawer.Content>
+          <Drawer.Header>
+            <Drawer.Title>
+              {editFeature != 0 ? "Edit Feature" : "Create Feature"}
+            </Drawer.Title>
+          </Drawer.Header>
+
+          <Drawer.Body className="p-4">
+            {/* <Text>This is where you edit the variant&apos;s details</Text> */}
+          </Drawer.Body>
+
+          <Drawer.Footer>
+            <Drawer.Close asChild>
+              <Button variant="secondary">Cancel</Button>
+            </Drawer.Close>
+
+            <Button
+              onClick={() => onUpdate(editFeature != 0)}
+              disabled={saving}
+            >
+              Save
+            </Button>
+          </Drawer.Footer>
+        </Drawer.Content>
+      </Drawer>
     </>
   );
 };

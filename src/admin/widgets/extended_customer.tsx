@@ -24,6 +24,15 @@ type AdminCustomerExtended = AdminCustomer & {
 const ExtendedCustomerWidget = ({
   data: customer,
 }: DetailWidgetProps<AdminCustomerExtended>) => {
+  const IS_PROD = import.meta.env.PROD;
+  const STORE_URL = import.meta.env.VITE_STORE_URL;
+  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
+  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
+
+  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
+  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
+  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
+
   const { data: qr } = useQuery({
     queryFn: () =>
       sdk.admin.customer.retrieve(customer.id, {
@@ -50,15 +59,6 @@ const ExtendedCustomerWidget = ({
       setIsDriver(extended.is_driver || false);
     }
   }, [extended]);
-
-  const IS_PROD = import.meta.env.PROD;
-  const STORE_URL = import.meta.env.VITE_STORE_URL;
-  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
-  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
-
-  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
-  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
 
   const onDriverChange = async (checked: boolean) => {
     setIsDriver(checked);
