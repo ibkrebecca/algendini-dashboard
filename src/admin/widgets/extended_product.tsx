@@ -5,6 +5,8 @@ import {
   Drawer,
   DropdownMenu,
   IconButton,
+  Input,
+  Label,
   Prompt,
   Table,
   toast,
@@ -18,7 +20,6 @@ import { JsonView } from "./json_view";
 import { EllipsisHorizontal, PencilSquare, Trash } from "@medusajs/icons";
 
 type Feature = {
-  id: string;
   title: string;
   value: string;
 };
@@ -54,6 +55,8 @@ const ExtendedProductWidget = ({
   const prod = qr?.product as AdminProductExtended;
   const extended = prod?.extended_product;
 
+  const [title, setTitle] = useState("");
+  const [value, setValue] = useState("");
   const [features, setFeatures] = useState<Feature[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -87,31 +90,63 @@ const ExtendedProductWidget = ({
     if (canPrevTable) setTableIndex(tableIndex - 1);
   };
 
-  const onUpdate = async (isEdit: boolean) => {
+  const onUpdate = async (isEdit: boolean, id: number | null) => {
     setSaving(true);
 
+    const newFeature: Feature = {
+      title,
+      value,
+    };
+
+    let newFeatures: Feature[];
     if (isEdit) {
+      const index: number = id! - 1;
+      newFeatures = features.map((f, i) => (i === index ? newFeature : f));
     } else {
-      // const url = `${BASE_URL}/store/products/update`;
-      // const res = await fetch(url, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     "x-publishable-api-key": P_KEY,
-      //   },
-      //   body: JSON.stringify({ id: product.id, features: features }),
-      //   credentials: "include",
-      // });
-      // if (!res.ok) {
-      //   toast.error("Error", {
-      //     description: "Failed to update product features.",
-      //   });
-      //   setSaving(false);
-      // }
-      // toast.success("Success", {
-      //   description: "Product features updated.",
-      // });
-      // setSaving(false);
+      newFeatures = [...features, newFeature];
+    }
+
+    await onUpdateApi(newFeatures);
+  };
+
+  const onDelete = async (id: number | null) => {
+    const index: number = id! - 1;
+    const newFeatures: Feature[] = features.filter((_, i) => i !== index);
+
+    await onUpdateApi(newFeatures);
+  };
+
+  const onUpdateApi = async (newFeatures: Feature[]) => {
+    try {
+      const url = `${BASE_URL}/store/products/update`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-publishable-api-key": P_KEY,
+        },
+        body: JSON.stringify({ id: product.id, features: newFeatures }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        toast.error("Error", {
+          description: "Failed to update features.",
+        });
+        return;
+      }
+
+      toast.success("Success", {
+        description: "Features updated.",
+      });
+      setFeatures(newFeatures);
+    } catch (error) {
+      toast.error("Error", {
+        description: "An unexpected error occurred.",
+      });
+    } finally {
+      setSaving(false);
+      setEditFeature(null);
     }
   };
 
@@ -163,7 +198,11 @@ const ExtendedProductWidget = ({
                           <DropdownMenu.Content>
                             <DropdownMenu.Item
                               className="gap-x-2"
-                              onClick={() => setEditFeature(id)}
+                              onClick={() => {
+                                setEditFeature(id);
+                                setTitle(features[index].title);
+                                setValue(features[index].value);
+                              }}
                             >
                               <PencilSquare className="text-ui-fg-subtle" />
                               Edit
@@ -218,7 +257,9 @@ const ExtendedProductWidget = ({
 
           <Prompt.Footer>
             <Prompt.Cancel>Cancel</Prompt.Cancel>
-            <Prompt.Action>Delete</Prompt.Action>
+            <Prompt.Action onClick={() => onDelete(deleteFeature)}>
+              Delete
+            </Prompt.Action>
           </Prompt.Footer>
         </Prompt.Content>
       </Prompt>
@@ -235,8 +276,32 @@ const ExtendedProductWidget = ({
             </Drawer.Title>
           </Drawer.Header>
 
-          <Drawer.Body className="p-4">
-            {/* <Text>This is where you edit the variant&apos;s details</Text> */}
+          <Drawer.Body className="flex flex-col gap-y-4 p-4">
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center gap-x-1">
+                <Label size="small" weight="plus">
+                  Title
+                </Label>
+              </div>
+              <Input
+                id="title"
+                defaultValue={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center gap-x-1">
+                <Label size="small" weight="plus">
+                  Value
+                </Label>
+              </div>
+              <Input
+                id="value"
+                defaultValue={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+            </div>
           </Drawer.Body>
 
           <Drawer.Footer>
@@ -245,8 +310,8 @@ const ExtendedProductWidget = ({
             </Drawer.Close>
 
             <Button
-              onClick={() => onUpdate(editFeature != 0)}
-              disabled={saving}
+              onClick={() => onUpdate(editFeature != 0, editFeature)}
+              disabled={saving || !title || !value}
             >
               Save
             </Button>

@@ -96,6 +96,7 @@ const ExtendedProductCategoryWidget = ({
       toast.error("Error", {
         description: "Failed to upload image.",
       });
+      return;
     }
 
     const data = await res.json();
@@ -119,13 +120,14 @@ const ExtendedProductCategoryWidget = ({
       toast.error("Error", {
         description: "Failed to updating category image.",
       });
-    } else {
-      setImage(image_url);
-      setFile(null);
-      toast.success("Success", {
-        description: "Category image added.",
-      });
+      return;
     }
+    
+    setImage(image_url);
+    setFile(null);
+    toast.success("Success", {
+      description: "Category image added.",
+    });
   };
 
   return (

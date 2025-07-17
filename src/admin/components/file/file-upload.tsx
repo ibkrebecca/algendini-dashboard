@@ -126,6 +126,7 @@ export const FileUpload = ({
           </Text>
         )}
       </button>
+      
       <input
         hidden
         ref={inputRef}

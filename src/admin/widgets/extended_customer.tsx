@@ -78,8 +78,9 @@ const ExtendedCustomerWidget = ({
       toast.error("Error", {
         description: "Failed to update driver state.",
       });
+      return;
     }
-
+    
     toast.success("Success", {
       description: checked
         ? "Customer is now a driver."
