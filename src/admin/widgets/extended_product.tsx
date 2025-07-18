@@ -144,7 +144,7 @@ const ExtendedProductWidget = ({
   };
 
   const onClean = () => {
-    queryClient.invalidateQueries({ queryKey: [["products"]] });
+    queryClient.invalidateQueries({ queryKey: [["product"]] });
 
     setFeatureTitle("");
     setFeatureValue("");

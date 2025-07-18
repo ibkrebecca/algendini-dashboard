@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-// import { deleteBrandWorkflow } from "../../../../workflows/brand/delete";
+import { deleteBrandWorkflow } from "../../../../workflows/brand/delete";
 
 interface InputType {
   id: string;
@@ -21,11 +21,11 @@ export async function POST(
       });
     }
 
-    // const { result: deleted } = await deleteBrandWorkflow(req.scope).run({
-    //   input: {
-    //     id,
-    //   },
-    // });
+    const { result: deleted } = await deleteBrandWorkflow(req.scope).run({
+      input: {
+        id,
+      },
+    });
 
     // res.status(201).json(deleted);
   } catch (error) {
