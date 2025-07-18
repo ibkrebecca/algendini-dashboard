@@ -7,11 +7,11 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { order, skip = 0, take = 50, q, id, random } = req.query;
+    const { order, skip = 0, take = 25, q, id, random, categories } = req.query;
     const orderObj = JSON.parse((order as string) || "{}");
 
     const skipNum = parseInt(skip as string) || 0;
-    const takeNum = parseInt(take as string) || 50;
+    const takeNum = parseInt(take as string) || 25;
 
     const service = req.scope.resolve("product");
     const [, count] = await service.listAndCountProducts();
@@ -23,6 +23,12 @@ export async function GET(
     const filters: any = { status: "published" };
     if (q) filters.title = { $ilike: `%${q}%` };
     if (id) filters.id = id;
+
+    // parse categories from query and add to filters
+    if (categories) {
+      const catIds = (categories as string).split(",");
+      filters.categories = { id: { $in: catIds } };
+    }
 
     const { result: products } = await retrieveProductsWorkflow(req.scope).run({
       input: {
