@@ -124,6 +124,9 @@ const getExtendedModel = () => {
     {
       resolve: "./src/modules/xchange",
     },
+    {
+      resolve: "./src/modules/brand",
+    },
   ];
 };
 module.exports = defineConfig({

@@ -136,6 +136,7 @@ const createExtendedCustomer = createStep(
         extended_customer_id: input.customer_id,
       },
     });
+    
     return new StepResponse(extendedCustomer, {
       extendedCustomerId: input.customer_id,
     });
