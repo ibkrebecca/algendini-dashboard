@@ -2,6 +2,7 @@ import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { AdminProduct, DetailWidgetProps } from "@medusajs/framework/types";
 import {
   Button,
+  clx,
   Drawer,
   DropdownMenu,
   IconButton,
@@ -10,6 +11,7 @@ import {
   Prompt,
   Table,
   toast,
+  Text,
 } from "@medusajs/ui";
 import { useEffect, useState } from "react";
 import { Header } from "../components/header";
@@ -28,6 +30,10 @@ type AdminProductExtended = AdminProduct & {
   extended_product?: {
     view_count?: number;
     features?: Feature[];
+    brand?: {
+      id: string;
+      name: string;
+    };
   };
 };
 
@@ -47,7 +53,7 @@ const ExtendedProductWidget = ({
   const { data: qr } = useQuery({
     queryFn: () =>
       sdk.admin.product.retrieve(product.id, {
-        fields: "+extended_product.*",
+        fields: "+brand.*,+extended_product.*",
       }),
     queryKey: [["product", product.id]],
   });
@@ -55,8 +61,8 @@ const ExtendedProductWidget = ({
   const prod = qr?.product as AdminProductExtended;
   const extended = prod?.extended_product;
 
-  const [title, setTitle] = useState("");
-  const [value, setValue] = useState("");
+  const [featureTitle, setFeatureTitle] = useState("");
+  const [featureValue, setFeatureValue] = useState("");
   const [features, setFeatures] = useState<Feature[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -94,8 +100,8 @@ const ExtendedProductWidget = ({
     setSaving(true);
 
     const newFeature: Feature = {
-      title,
-      value,
+      title: featureTitle,
+      value: featureValue,
     };
 
     let newFeatures: Feature[];
@@ -154,6 +160,40 @@ const ExtendedProductWidget = ({
     <>
       <UiContainer className="pb-4">
         <Header
+          title="Brand"
+          actions={[
+            {
+              type: "button",
+              props: {
+                children: "Create",
+                variant: "secondary",
+                onClick: () => setEditFeature(0),
+              },
+            },
+          ]}
+        />
+
+        <div className="flex h-full flex-col px-6 py-4">
+          <div
+            className={clx(`text-ui-fg-subtle grid grid-cols-2 items-center `)}
+          >
+            <Text size="small" weight="plus" leading="compact">
+              Name
+            </Text>
+
+            <Text
+              size="small"
+              leading="compact"
+              className="whitespace-pre-line text-pretty"
+            >
+              {extended?.brand?.name || "-"}
+            </Text>
+          </div>
+        </div>
+      </UiContainer>
+
+      <UiContainer className="pb-4">
+        <Header
           title="Features"
           actions={[
             {
@@ -200,8 +240,8 @@ const ExtendedProductWidget = ({
                               className="gap-x-2"
                               onClick={() => {
                                 setEditFeature(id);
-                                setTitle(features[index].title);
-                                setValue(features[index].value);
+                                setFeatureTitle(features[index].title);
+                                setFeatureValue(features[index].value);
                               }}
                             >
                               <PencilSquare className="text-ui-fg-subtle" />
@@ -284,9 +324,9 @@ const ExtendedProductWidget = ({
                 </Label>
               </div>
               <Input
-                id="title"
-                defaultValue={title}
-                onChange={(e) => setTitle(e.target.value)}
+                id="feature-title"
+                defaultValue={featureTitle}
+                onChange={(e) => setFeatureTitle(e.target.value)}
               />
             </div>
 
@@ -297,9 +337,9 @@ const ExtendedProductWidget = ({
                 </Label>
               </div>
               <Input
-                id="value"
-                defaultValue={value}
-                onChange={(e) => setValue(e.target.value)}
+                id="feature-value"
+                defaultValue={featureValue}
+                onChange={(e) => setFeatureValue(e.target.value)}
               />
             </div>
           </Drawer.Body>
@@ -311,7 +351,7 @@ const ExtendedProductWidget = ({
 
             <Button
               onClick={() => onUpdate(editFeature != 0, editFeature)}
-              disabled={saving || !title || !value}
+              disabled={saving || !featureTitle || !featureValue}
             >
               Save
             </Button>

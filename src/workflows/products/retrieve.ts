@@ -35,6 +35,7 @@ const retrieveProducts = createStep(
         "shipping_profile.*",
         "type.*",
         "metadata.*",
+        "brand.*",
         "extended_product.*",
       ],
       filters: input.filters,

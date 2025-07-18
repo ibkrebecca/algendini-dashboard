@@ -4,6 +4,7 @@ import {
   MedusaRequest,
   MedusaResponse,
   validateAndTransformBody,
+  validateAndTransformQuery,
 } from "@medusajs/framework/http";
 import { corsMiddleware } from "./middlewares/cors";
 import { apiKeyAuth } from "./middlewares/api_key_auth";
@@ -13,16 +14,38 @@ import { ResetPasswordRequest } from "./validators";
 import { validateScopeProviderAssociation } from "@medusajs/medusa/api/auth/utils/validate-scope-provider-association";
 import { validateToken } from "@medusajs/medusa/api/auth/utils/validate-token";
 import multer from "multer";
+import { createFindParams } from "@medusajs/medusa/api/utils/validators";
 
 const upload = multer({ storage: multer.memoryStorage() });
+export const GetBrandsSchema = createFindParams();
 
 const general_apis: Array<any> = [
+  {
+    matcher: "/admin/brands",
+    method: "GET",
+    middlewares: [
+      validateAndTransformQuery(GetBrandsSchema, {
+        defaults: ["id", "name", "products.*"],
+        isList: true,
+      }),
+    ],
+  },
+
+  {
+    matcher: "/admin/products",
+    method: ["POST"],
+    additionalDataValidator: {
+      brand_id: z.string().optional(),
+    },
+  },
+
   {
     matcher: "/admin/products/:id",
     method: ["GET", "PUT", "PATCH", "DELETE"],
     middlewares: [
       (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
-        (req.allowed ??= []).push("extended_product");
+        (req.allowed ??= []).push("brand");
+        req.allowed.push("extended_product");
         next();
       },
     ],
