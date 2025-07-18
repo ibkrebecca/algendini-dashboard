@@ -1,29 +1,35 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { updateBrandWorkflow } from "../../../../workflows/brand/update";
+// import { deleteBrandWorkflow } from "../../../../workflows/brand/delete";
 
 interface InputType {
   id: string;
-  name: string;
 }
 
-// /store/brand/update/ - update a brand
+// /store/brands/delete/ - delete a brand
 export async function POST(
   req: MedusaRequest<InputType>,
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { id, name } = req.body as InputType;
+    const { id } = req.body as InputType;
 
-    const { result } = await updateBrandWorkflow(req.scope).run({
-      input: {
-        id,
-        name,
-      },
-    });
+    // validate required fields
+    if (!id) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "Brand id is required",
+      });
+    }
 
-    res.status(201).json(result);
+    // const { result: deleted } = await deleteBrandWorkflow(req.scope).run({
+    //   input: {
+    //     id,
+    //   },
+    // });
+
+    // res.status(201).json(deleted);
   } catch (error) {
-    console.error("Error updating brand:", error);
+    console.error("Error deleting brand:", error);
 
     if (error.message?.includes("not found")) {
       res.status(404).json({
@@ -41,7 +47,7 @@ export async function POST(
 
     res.status(500).json({
       error: "Internal Server Error",
-      message: "Failed to update brand",
+      message: "Failed to delete brand",
     });
   }
 }

@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { retrieveBrandWorkflow } from "../../../../workflows/brand/retrieve";
 
-// /store/brand/retrieve/ - retrieve all brand
+// /store/brands/retrieve/ - retrieve all brand
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
@@ -13,13 +13,13 @@ export async function GET(
     const filters: any = {};
     if (id) filters.id = id;
 
-    const { result: brand } = await retrieveBrandWorkflow(req.scope).run({
+    const { result: brands } = await retrieveBrandWorkflow(req.scope).run({
       input: {
         filters,
       },
     });
 
-    res.json(brand);
+    res.status(201).json(brands);
   } catch (error) {
     console.error("Error retriving brand:", error);
 

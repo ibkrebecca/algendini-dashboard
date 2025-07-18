@@ -23,7 +23,7 @@ export async function POST(
       });
     }
 
-    const { result } = await updateProductsWorkflow(req.scope).run({
+    const { result: updated } = await updateProductsWorkflow(req.scope).run({
       input: {
         id,
         view_count,
@@ -31,7 +31,7 @@ export async function POST(
       },
     });
 
-    res.status(201).json(result);
+    res.status(201).json(updated);
   } catch (error) {
     console.error("Error updating product:", error);
 

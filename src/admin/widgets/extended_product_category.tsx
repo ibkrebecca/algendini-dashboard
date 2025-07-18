@@ -25,13 +25,12 @@ const ExtendedProductCategoryWidget = ({
   data: category,
 }: DetailWidgetProps<AdminProductCategoryExtended>) => {
   const IS_PROD = import.meta.env.PROD;
-  const STORE_URL = import.meta.env.VITE_STORE_URL;
-  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
-  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
-
   const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
   const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
-  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
+  const HEADERS = {
+    "Content-Type": "application/json",
+    "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+  };
 
   const { data: qr } = useQuery({
     queryFn: () =>
@@ -65,7 +64,22 @@ const ExtendedProductCategoryWidget = ({
     }
 
     try {
-      onUploadApi(file).then((res) => onUpdate(res));
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const data = await sdk.client.fetch<{ url: string }>(
+        "/store/upload/single_image",
+        {
+          method: "POST",
+          headers: {
+            "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+          },
+          body: formData,
+        }
+      );
+
+      const url = data.url;
+      await onUpdate(url);
     } catch {
       toast.error("Error", {
         description: "Failed to save the image.",
@@ -75,59 +89,24 @@ const ExtendedProductCategoryWidget = ({
     }
   };
 
-  const onUploadApi = async (file: File) => {
-    setSaving(true);
-
-    const url = `${BASE_URL}/store/upload/single_image`;
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "x-publishable-api-key": P_KEY,
-      },
-      body: formData,
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      toast.error("Error", {
-        description: "Failed to upload image.",
-      });
-      return;
-    }
-
-    const data = await res.json();
-    return await data.url;
-  };
-
   const onUpdate = async (image_url: string) => {
-    const url = `${BASE_URL}/store/categories/update_image/`;
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-publishable-api-key": P_KEY,
-      },
-      body: JSON.stringify({ id: category.id, url: image_url }),
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      toast.error("Error", {
-        description: "Failed to updating category image.",
+    try {
+      await sdk.client.fetch("/store/categories/update_image", {
+        method: "POST",
+        headers: HEADERS,
+        body: { id: category.id, url: image_url },
       });
-      return;
+
+      setImage(image_url);
+      setFile(null);
+      toast.success("Success", {
+        description: "Category image added.",
+      });
+    } catch (error) {
+      toast.error("Error", {
+        description: "Failed to update category image.",
+      });
     }
-    
-    setImage(image_url);
-    setFile(null);
-    toast.success("Success", {
-      description: "Category image added.",
-    });
   };
 
   return (

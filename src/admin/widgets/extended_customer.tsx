@@ -25,13 +25,12 @@ const ExtendedCustomerWidget = ({
   data: customer,
 }: DetailWidgetProps<AdminCustomerExtended>) => {
   const IS_PROD = import.meta.env.PROD;
-  const STORE_URL = import.meta.env.VITE_STORE_URL;
-  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
-  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
-
   const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
   const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
-  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
+  const HEADERS = {
+    "Content-Type": "application/json",
+    "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+  };
 
   const { data: qr } = useQuery({
     queryFn: () =>
@@ -62,25 +61,13 @@ const ExtendedCustomerWidget = ({
 
   const onDriverChange = async (checked: boolean) => {
     setIsDriver(checked);
-    const url = `${BASE_URL}/store/customers/update`;
 
-    const res = await fetch(url, {
+    await sdk.client.fetch("/store/customers/update", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-publishable-api-key": P_KEY,
-      },
-      body: JSON.stringify({ id: customer.id, is_driver: checked }),
-      credentials: "include",
+      headers: HEADERS,
+      body: { id: customer.id, is_driver: checked },
     });
 
-    if (!res.ok) {
-      toast.error("Error", {
-        description: "Failed to update driver state.",
-      });
-      return;
-    }
-    
     toast.success("Success", {
       description: checked
         ? "Customer is now a driver."

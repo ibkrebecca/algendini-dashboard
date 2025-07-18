@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import { Header } from "../components/header";
 import { Container as UiContainer } from "../components/container";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { sdk } from "../lib/config";
 import { JsonView } from "./json_view";
 import { EllipsisHorizontal, PencilSquare, Trash } from "@medusajs/icons";
@@ -41,14 +41,14 @@ type AdminProductExtended = AdminProduct & {
 const ExtendedProductWidget = ({
   data: product,
 }: DetailWidgetProps<AdminProductExtended>) => {
+  const queryClient = useQueryClient();
   const IS_PROD = import.meta.env.PROD;
-  const STORE_URL = import.meta.env.VITE_STORE_URL;
-  const LOCAL_STORE_URL = import.meta.env.VITE_LOCAL_STORE_URL;
-  const BASE_URL = IS_PROD ? STORE_URL : LOCAL_STORE_URL;
-
   const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
   const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
-  const P_KEY = IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY;
+  const HEADERS = {
+    "Content-Type": "application/json",
+    "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+  };
 
   const { data: qr } = useQuery({
     queryFn: () =>
@@ -124,23 +124,11 @@ const ExtendedProductWidget = ({
 
   const onUpdateApi = async (newFeatures: Feature[]) => {
     try {
-      const url = `${BASE_URL}/store/products/update`;
-      const res = await fetch(url, {
+      await sdk.client.fetch("/store/products/update", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-publishable-api-key": P_KEY,
-        },
-        body: JSON.stringify({ id: product.id, features: newFeatures }),
-        credentials: "include",
+        headers: HEADERS,
+        body: { id: product.id, features: newFeatures },
       });
-
-      if (!res.ok) {
-        toast.error("Error", {
-          description: "Failed to update features.",
-        });
-        return;
-      }
 
       toast.success("Success", {
         description: "Features updated.",
@@ -148,14 +136,21 @@ const ExtendedProductWidget = ({
       setFeatures(newFeatures);
     } catch (error) {
       toast.error("Error", {
-        description: "An unexpected error occurred.",
+        description: "Failed to update features.",
       });
     } finally {
-      setSaving(false);
-      setEditFeature(null);
+      onClean();
     }
   };
 
+  const onClean = () => {
+    queryClient.invalidateQueries({ queryKey: [["products"]] });
+
+    setFeatureTitle("");
+    setFeatureValue("");
+    setSaving(false);
+    setEditFeature(null);
+  };
   return (
     <>
       <UiContainer className="pb-4">
@@ -226,7 +221,6 @@ const ExtendedProductWidget = ({
                     <Table.Row key={id}>
                       <Table.Cell>{feature.title}</Table.Cell>
                       <Table.Cell>{feature.value}</Table.Cell>
-
                       <Table.Cell className="text-right">
                         <DropdownMenu>
                           <DropdownMenu.Trigger asChild>

@@ -27,7 +27,6 @@ const updateBrand = createStep(
 
     if (!exist) {
       await brandService.createBrands({
-        // id: input.id,
         name: input.name,
       });
     } else {
