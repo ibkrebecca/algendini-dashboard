@@ -12,7 +12,6 @@ import { FilePreview } from "@/components/file/file-preview";
 import { Thumbnail } from "@/components/thumbnail";
 import { useQuery } from "@tanstack/react-query";
 import { sdk } from "@/lib/config";
-import { JsonView } from "@/widgets/json_view";
 
 type AdminProductCategoryExtended = AdminProductCategory & {
   extended_product_category?: {
@@ -21,15 +20,9 @@ type AdminProductCategoryExtended = AdminProductCategory & {
 };
 
 // the extended product category widget
-const ExtendedProductCategoryWidget = ({
+const ImageWidget = ({
   data: category,
 }: DetailWidgetProps<AdminProductCategoryExtended>) => {
-  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const HEADERS = {
-    "Content-Type": "application/json",
-    "x-publishable-api-key": PUBLIC_KEY,
-  };
-
   const { data: qr } = useQuery({
     queryFn: () =>
       sdk.admin.productCategory.retrieve(category.id, {
@@ -41,13 +34,17 @@ const ExtendedProductCategoryWidget = ({
   const cat = qr?.product_category as AdminProductCategoryExtended;
   const extended = cat?.extended_product_category;
 
-  const [image, setImage] = useState(extended?.image);
+  const [image, setImage] = useState<string | undefined>(extended?.image);
   const [file, setFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState<boolean>(false);
 
   useEffect(() => {
     if (extended?.image) setImage(extended.image);
   }, [extended?.image]);
+
+  const HEADERS = {
+    "x-publishable-api-key": import.meta.env.VITE_PUBLIC_KEY,
+  };
 
   const onImageChange = (files: FileType[]) => {
     if (files.length > 0) setFile(files[0].file);
@@ -69,9 +66,7 @@ const ExtendedProductCategoryWidget = ({
         `${import.meta.env.VITE_STORE_URL}/store/uploads/single_image`,
         {
           method: "POST",
-          headers: {
-            "x-publishable-api-key": PUBLIC_KEY,
-          },
+          headers: HEADERS,
           body: formData,
           credentials: "include",
         }
@@ -144,14 +139,12 @@ const ExtendedProductCategoryWidget = ({
           </div>
         </div>
       </UiContainer>
-
-      <JsonView data={extended || {}} title="EXTENDED JSON" />
     </>
   );
 };
 
 export const config = defineWidgetConfig({
-  zone: "product_category.details.side.after",
+  zone: "product_category.details.side.before",
 });
 
-export default ExtendedProductCategoryWidget;
+export default ImageWidget;
