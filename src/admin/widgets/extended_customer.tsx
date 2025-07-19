@@ -24,10 +24,9 @@ type AdminCustomerExtended = AdminCustomer & {
 const ExtendedCustomerWidget = ({
   data: customer,
 }: DetailWidgetProps<AdminCustomerExtended>) => {
-  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
   const HEADERS = {
     "Content-Type": "application/json",
-    "x-publishable-api-key": PUBLIC_KEY,
+    "x-publishable-api-key": import.meta.env.VITE_PUBLIC_KEY,
   };
 
   const { data: qr } = useQuery({

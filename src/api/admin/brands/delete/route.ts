@@ -27,7 +27,7 @@ export async function POST(
       },
     });
 
-    // res.status(201).json(deleted);
+    res.status(201).json(deleted);
   } catch (error) {
     console.error("Error deleting brand:", error);
 

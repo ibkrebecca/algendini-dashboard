@@ -58,7 +58,7 @@ const productApis: Array<any> = [
 
 const BrandApis: Array<any> = [
   {
-    matcher: "/admin/brands",
+    matcher: "/admin/brands/retrieve",
     method: "GET",
     middlewares: [
       validateAndTransformQuery(GetBrandsSchema, {

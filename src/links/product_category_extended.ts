@@ -8,7 +8,7 @@ export default defineLink(
   ExtendedProductCategoryModule.linkable.extendedProductCategory,
   {
     database: {
-      table: "product_product_category_extended",
+      table: "product_category_extended",
     },
   }
 );

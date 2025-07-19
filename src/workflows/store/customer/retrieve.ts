@@ -20,7 +20,6 @@ const retrieveCustomer = createStep(
         "groups.*",
         "addresses.*",
         "extended_customer.*",
-        "addresses.extended_customer_address.*",
       ],
       filters: { id: input.id },
     });

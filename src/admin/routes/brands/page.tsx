@@ -44,18 +44,43 @@ const columnHelper = createDataTableColumnHelper<Brand>();
 const BrandsPage = () => {
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
-
   const [brandDelete, setBrandDelete] = useState<string | null>(null);
   const [brandEdit, setBrandEdit] = useState<string | null>(null);
 
-  const columns = [
-    columnHelper.accessor("id", {
-      header: "ID",
-    }),
-    columnHelper.accessor("name", {
-      header: "Name",
-    }),
-    columnHelper.display({
+  // pagination
+  const limit = 25;
+  const [pagination, setPagination] = useState<DataTablePaginationState>({
+    pageSize: limit,
+    pageIndex: 0,
+  });
+
+  const offset = useMemo(() => {
+    return pagination.pageIndex * limit;
+  }, [pagination]);
+
+  // get brands oder by created_at
+  const { data, isLoading } = useQuery<BrandsResponse>({
+    queryFn: () =>
+      sdk.client.fetch(`/admin/brands/retrieve`, {
+        query: {
+          limit,
+          offset,
+          order: "-created_at",
+        },
+      }),
+    queryKey: [["brands", limit, offset]],
+  });
+
+  // header and query reload
+  const queryClient = useQueryClient();
+  const HEADERS = {
+    "Content-Type": "application/json",
+    "x-publishable-api-key": import.meta.env.VITE_PUBLIC_KEY,
+  };
+
+  // generate cols
+  const colAction = () => {
+    return columnHelper.display({
       id: "actions",
       header: "",
       cell: ({ row }) => {
@@ -96,31 +121,20 @@ const BrandsPage = () => {
           </div>
         );
       },
+    });
+  };
+
+  const columns = [
+    columnHelper.accessor("id", {
+      header: "ID",
     }),
+    columnHelper.accessor("name", {
+      header: "Name",
+    }),
+    colAction(),
   ];
 
-  const limit = 25;
-  const [pagination, setPagination] = useState<DataTablePaginationState>({
-    pageSize: limit,
-    pageIndex: 0,
-  });
-
-  const offset = useMemo(() => {
-    return pagination.pageIndex * limit;
-  }, [pagination]);
-
-  const { data, isLoading } = useQuery<BrandsResponse>({
-    queryFn: () =>
-      sdk.client.fetch(`/admin/brands`, {
-        query: {
-          limit,
-          offset,
-          order: "-created_at",
-        },
-      }),
-    queryKey: [["brands", limit, offset]],
-  });
-
+  // generate table
   const table = useDataTable({
     columns,
     data: data?.brands || [],
@@ -133,18 +147,12 @@ const BrandsPage = () => {
     },
   });
 
-  const queryClient = useQueryClient();
-  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const HEADERS = {
-    "Content-Type": "application/json",
-    "x-publishable-api-key": PUBLIC_KEY,
-  };
-
+  // update brand
   const onBrandUpdate = async (isEdit: boolean, id: string | null) => {
     setSaving(true);
 
     if (isEdit) {
-      await sdk.client.fetch("/store/brands/update", {
+      await sdk.client.fetch("/admin/brands/update", {
         method: "POST",
         headers: HEADERS,
         body: { id, name },
@@ -153,7 +161,7 @@ const BrandsPage = () => {
         description: "Brand updated.",
       });
     } else {
-      await sdk.client.fetch("/store/brands/update", {
+      await sdk.client.fetch("/admin/brands/update", {
         method: "POST",
         headers: HEADERS,
         body: { name },
@@ -167,8 +175,9 @@ const BrandsPage = () => {
     onClean();
   };
 
+  // delete brand
   const onBrandDelete = async (id: string | null) => {
-    await sdk.client.fetch("/store/brands/delete", {
+    await sdk.client.fetch("/admin/brands/delete", {
       method: "POST",
       headers: HEADERS,
       body: { id },
@@ -177,6 +186,7 @@ const BrandsPage = () => {
     onClean();
   };
 
+  // clean
   const onClean = () => {
     queryClient.invalidateQueries({ queryKey: [["brands"]] });
 
@@ -185,6 +195,7 @@ const BrandsPage = () => {
     setBrandEdit(null);
   };
 
+  // main render
   return (
     <>
       <Container className="divide-y p-0">

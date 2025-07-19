@@ -51,10 +51,9 @@ const ExtendedProductWidget = ({
   data: product,
 }: DetailWidgetProps<AdminProductExtended>) => {
   const queryClient = useQueryClient();
-  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
   const HEADERS = {
     "Content-Type": "application/json",
-    "x-publishable-api-key": PUBLIC_KEY,
+    "x-publishable-api-key": import.meta.env.VITE_PUBLIC_KEY,
   };
 
   const { data: qr } = useQuery({
@@ -94,7 +93,7 @@ const ExtendedProductWidget = ({
 
   const { data: brands } = useQuery<BrandsResponse>({
     queryKey: ["brands"],
-    queryFn: () => sdk.client.fetch("/admin/brands"),
+    queryFn: () => sdk.client.fetch("/admin/brands/retrieve"),
   });
 
   const hasLen = features.length === 1;
