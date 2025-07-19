@@ -71,12 +71,8 @@ const BrandsPage = () => {
     queryKey: [["brands", limit, offset]],
   });
 
-  // header and query reload
+  //  query reload
   const queryClient = useQueryClient();
-  const HEADERS = {
-    "Content-Type": "application/json",
-    "x-publishable-api-key": import.meta.env.VITE_PUBLIC_KEY,
-  };
 
   // generate cols
   const colAction = () => {
@@ -154,7 +150,6 @@ const BrandsPage = () => {
     if (isEdit) {
       await sdk.client.fetch("/admin/brands/update", {
         method: "POST",
-        headers: HEADERS,
         body: { id, name },
       });
       toast.success("Success", {
@@ -163,7 +158,6 @@ const BrandsPage = () => {
     } else {
       await sdk.client.fetch("/admin/brands/update", {
         method: "POST",
-        headers: HEADERS,
         body: { name },
       });
 
@@ -179,7 +173,6 @@ const BrandsPage = () => {
   const onBrandDelete = async (id: string | null) => {
     await sdk.client.fetch("/admin/brands/delete", {
       method: "POST",
-      headers: HEADERS,
       body: { id },
     });
 

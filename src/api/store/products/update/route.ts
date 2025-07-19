@@ -3,7 +3,6 @@ import { updateProductsWorkflow } from "@/workflows/store/product/update";
 
 interface InputType {
   id: string;
-  view_count?: number;
   features?: object[];
 }
 
@@ -13,7 +12,7 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { id, view_count, features } = req.body as InputType;
+    const { id, features } = req.body as InputType;
 
     // validate required fields
     if (!id) {
@@ -26,7 +25,6 @@ export async function POST(
     const { result: updated } = await updateProductsWorkflow(req.scope).run({
       input: {
         id,
-        view_count,
         features,
       },
     });

@@ -39,10 +39,9 @@ type BrandsResponse = {
 };
 
 type AdminProductExtended = AdminProduct & {
+  brand?: Brand;
   extended_product?: {
-    view_count?: number;
     features?: Feature[];
-    brand?: Brand;
   };
 };
 
@@ -65,6 +64,7 @@ const ExtendedProductWidget = ({
   });
 
   const prod = qr?.product as AdminProductExtended;
+  const brand = prod?.brand;
   const extended = prod?.extended_product;
 
   const [featureTitle, setFeatureTitle] = useState("");
@@ -162,10 +162,18 @@ const ExtendedProductWidget = ({
     setSaving(true);
 
     try {
-      await sdk.client.fetch(`/store/products/brand`, {
+      const old_brand_id: string = brand?.id ?? "null";
+
+      console.log(old_brand_id);
+      
+      await sdk.client.fetch(`/admin/brands/product`, {
         method: "POST",
-        headers: HEADERS,
-        body: { id: product.id, brand_id: selectedBrand, is_remove: "false" },
+        body: {
+          brand_id: selectedBrand,
+          old_brand_id: old_brand_id,
+          product_id: product.id,
+          is_remove: "false",
+        },
       });
 
       toast.success("Success", {
@@ -227,7 +235,7 @@ const ExtendedProductWidget = ({
               leading="compact"
               className="whitespace-pre-line text-pretty"
             >
-              {extended?.brand?.name || "-"}
+              {brand?.name || "-"}
             </Text>
           </div>
         </div>
@@ -418,7 +426,7 @@ const ExtendedProductWidget = ({
               </div>
 
               <Select
-                value={selectedBrand || undefined}
+                value={selectedBrand || brand?.id || undefined}
                 onValueChange={setSelectedBrand}
               >
                 <Select.Trigger>

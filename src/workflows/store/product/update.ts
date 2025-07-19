@@ -10,7 +10,6 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 interface InputType {
   id: string;
-  view_count?: number;
   features?: object[];
 }
 
@@ -19,7 +18,6 @@ const updateExtendedProduct = createStep(
   async (
     input: {
       product_id: string;
-      view_count?: number;
       features?: object[];
     },
     { container }
@@ -40,7 +38,6 @@ const updateExtendedProduct = createStep(
     if (!exist) {
       await extendedProductService.createExtendedProducts({
         id: input.product_id,
-        view_count: input.view_count,
         features: input.features as unknown as Record<string, unknown>,
       });
 
@@ -52,8 +49,6 @@ const updateExtendedProduct = createStep(
       });
     } else {
       // prepare update data for extended product
-      if (input.view_count !== undefined)
-        update.view_count = new Date(input.view_count);
       if (input.features !== undefined) update.features = input.features;
 
       if (Object.keys(update).length > 0) {
@@ -77,7 +72,6 @@ const updateExtendedProduct = createStep(
       // restore original data
       await extendedProductService.updateExtendedProducts({
         id: revert.product_id,
-        view_count: revert.original.view_count,
         features: revert.original.features,
       });
     }
@@ -90,7 +84,6 @@ export const updateProductsWorkflow = createWorkflow(
   function (input: InputType) {
     const extended_product = updateExtendedProduct({
       product_id: input.id,
-      view_count: input.view_count,
       features: input.features,
     });
 

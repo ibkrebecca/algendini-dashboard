@@ -125,7 +125,6 @@ const productApis: Array<any> = [
     middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
     additionalDataValidator: {
       id: z.string(),
-      view_count: z.number().optional(),
       features: z
         .array(z.object({ title: z.string(), value: z.string() }))
         .optional(),
@@ -141,17 +140,6 @@ const productApis: Array<any> = [
       rateLimit(10, 15 * 60 * 1000),
       upload.single("image"),
     ],
-  },
-
-  {
-    matcher: "/store/products/brand",
-    method: "POST",
-    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
-    additionalDataValidator: {
-      id: z.string(),
-      brand_id: z.string(),
-      is_remove: z.string(),
-    },
   },
 ];
 

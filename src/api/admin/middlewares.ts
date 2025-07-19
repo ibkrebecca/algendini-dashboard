@@ -67,6 +67,16 @@ const BrandApis: Array<any> = [
       }),
     ],
   },
+
+  {
+    matcher: "/admin/brands/product",
+    method: "POST",
+    additionalDataValidator: {
+      id: z.string(),
+      brand_id: z.string(),
+      is_remove: z.string(),
+    },
+  },
 ];
 
 const adminMiddleware = [...customerApis, ...productApis, ...BrandApis];

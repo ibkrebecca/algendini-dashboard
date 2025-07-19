@@ -15,16 +15,6 @@
           "nullable": false,
           "mappedType": "text"
         },
-        "view_count": {
-          "name": "view_count",
-          "type": "integer",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "default": "0",
-          "mappedType": "integer"
-        },
         "features": {
           "name": "features",
           "type": "jsonb",
