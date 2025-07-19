@@ -63,7 +63,7 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework"
-import myWorkflow from "../../../workflows/hello-world"
+import myWorkflow from "@/../../workflows/hello-world"
 
 export async function GET(
   req: MedusaRequest,

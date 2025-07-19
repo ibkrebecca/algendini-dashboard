@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { EXTENDED_PRODUCT_CATEGORY_MODULE } from "../../../../modules/product_category";
+import { EXTENDED_PRODUCT_CATEGORY_MODULE } from "@/modules/product_category";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 // define the request body type

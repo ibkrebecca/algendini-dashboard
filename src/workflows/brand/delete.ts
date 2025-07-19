@@ -5,8 +5,7 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { BRAND_MODULE } from "../../modules/brand";
-import productBrandLink from "../../links/product_brand";
+import { BRAND_MODULE } from "@/../modules/brand";
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 interface InputType {

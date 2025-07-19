@@ -15,7 +15,7 @@
   "scripts": {
     "predeploy": "medusa db:migrate",
     "setup": "medusa db:setup",
-    "build": "medusa build",
+    "build": "medusa build && npm run resolve:aliases",
     "build:prod": "medusa build && ln -s .medusa/server/public/ public",
     "build:admin": "medusa build --admin-only",
     "start": "medusa db:migrate && medusa start",
@@ -23,7 +23,8 @@
     "seed": "medusa exec ./src/scripts/seed.ts",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:integration:modules": "TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit",
-    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit"
+    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit",
+    "resolve:aliases": "tsc --showConfig -p tsconfig.json > tsconfig.resolved.json && tsc-alias -p tsconfig.resolved.json && rimraf tsconfig.resolved.json"
   },
   "dependencies": {
     "@medusajs/admin-sdk": "2.8.7",
@@ -52,7 +53,9 @@
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.6.2",
     "vite": "^5.2.11",
     "yalc": "^1.0.0-pre.53"

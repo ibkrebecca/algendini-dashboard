@@ -1,5 +1,4 @@
 /dist
-.env
 .DS_Store
 /uploads
 /node_modules
@@ -25,3 +24,5 @@ build
 
 .medusa
 todo
+.env
+.env.production

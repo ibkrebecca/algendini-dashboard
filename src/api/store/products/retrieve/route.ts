@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveProductsWorkflow } from "../../../../workflows/products/retrieve";
+import { retrieveProductsWorkflow } from "@/workflows/products/retrieve";
 
 // /store/products/retrieve/ - retrieve all products
 export async function GET(
@@ -20,7 +20,7 @@ export async function GET(
     const randomSkip = Math.floor(Math.random() * (maxSkip + 1));
 
     // build filters
-    const filters: any = { status: "published" };
+    const filters: Record<string, any> = { status: "published" };
     if (q) filters.title = { $ilike: `%${q}%` };
     if (id) filters.id = id;
 

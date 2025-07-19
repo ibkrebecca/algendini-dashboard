@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveCustomerWorkflow } from "../../../../workflows/customers/retrieve";
+import { retrieveCustomerWorkflow } from "@/workflows/customers/retrieve";
 
 // /store/customers/retrieve/ - retrieve a customer
 export async function GET(

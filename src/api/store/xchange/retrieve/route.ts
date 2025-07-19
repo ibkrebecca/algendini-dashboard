@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveXchangeWorkflow } from "../../../../workflows/xchange/retrieve";
+import { retrieveXchangeWorkflow } from "@/workflows/xchange/retrieve";
 
 // /store/xchange/retrieve/ - retrieve all xchange
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ): Promise<void> {
   try {
     // build filters
-    const filters: any = { id: "xchange" };
+    const filters: Record<string, any> = { id: "xchange" };
 
     const { result: xchange } = await retrieveXchangeWorkflow(req.scope).run({
       input: {

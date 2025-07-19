@@ -25,7 +25,7 @@ import {
   DataTablePaginationState,
   useDataTable,
 } from "@medusajs/ui";
-import { sdk } from "../../lib/config";
+import { sdk } from "@/lib/config";
 
 type Brand = {
   id: string;
@@ -45,8 +45,8 @@ const BrandsPage = () => {
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const [deleteBrand, setDeleteBrand] = useState<string | null>(null);
-  const [editBrand, setEditBrand] = useState<string | null>(null);
+  const [brandDelete, setBrandDelete] = useState<string | null>(null);
+  const [brandEdit, setBrandEdit] = useState<string | null>(null);
 
   const columns = [
     columnHelper.accessor("id", {
@@ -74,7 +74,7 @@ const BrandsPage = () => {
                 <DropdownMenu.Item
                   className="gap-x-2"
                   onClick={() => {
-                    setEditBrand(brand.id);
+                    setBrandEdit(brand.id);
                     setName(brand.name);
                   }}
                 >
@@ -86,7 +86,7 @@ const BrandsPage = () => {
 
                 <DropdownMenu.Item
                   className="gap-x-2"
-                  onClick={() => setDeleteBrand(brand.id)}
+                  onClick={() => setBrandDelete(brand.id)}
                 >
                   <Trash className="text-ui-fg-subtle" />
                   Delete
@@ -142,7 +142,7 @@ const BrandsPage = () => {
     "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
   };
 
-  const onUpdate = async (isEdit: boolean, id: string | null) => {
+  const onBrandUpdate = async (isEdit: boolean, id: string | null) => {
     setSaving(true);
 
     if (isEdit) {
@@ -169,7 +169,7 @@ const BrandsPage = () => {
     onClean();
   };
 
-  const onDelete = async (id: string | null) => {
+  const onBrandDelete = async (id: string | null) => {
     await sdk.client.fetch("/store/brands/delete", {
       method: "POST",
       headers: HEADERS,
@@ -184,7 +184,7 @@ const BrandsPage = () => {
 
     setName("");
     setSaving(false);
-    setEditBrand(null);
+    setBrandEdit(null);
   };
 
   return (
@@ -193,7 +193,7 @@ const BrandsPage = () => {
         <DataTable instance={table}>
           <DataTable.Toolbar className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <Heading>Brands</Heading>
-            <Button onClick={() => setEditBrand("0")}>Create</Button>
+            <Button onClick={() => setBrandEdit("0")}>Create</Button>
           </DataTable.Toolbar>
 
           <DataTable.Table />
@@ -202,8 +202,8 @@ const BrandsPage = () => {
       </Container>
 
       <Prompt
-        open={deleteBrand != null}
-        onOpenChange={() => setDeleteBrand(null)}
+        open={brandDelete != null}
+        onOpenChange={() => setBrandDelete(null)}
       >
         <Prompt.Trigger asChild />
         <Prompt.Content>
@@ -217,19 +217,19 @@ const BrandsPage = () => {
 
           <Prompt.Footer>
             <Prompt.Cancel>Cancel</Prompt.Cancel>
-            <Prompt.Action onClick={() => onDelete(deleteBrand)}>
+            <Prompt.Action onClick={() => onBrandDelete(brandDelete)}>
               Delete
             </Prompt.Action>
           </Prompt.Footer>
         </Prompt.Content>
       </Prompt>
 
-      <Drawer open={editBrand != null} onOpenChange={() => setEditBrand(null)}>
+      <Drawer open={brandEdit != null} onOpenChange={() => setBrandEdit(null)}>
         <Drawer.Trigger asChild />
         <Drawer.Content>
           <Drawer.Header>
             <Drawer.Title>
-              {editBrand != "0" ? "Edit Brand" : "Create Brand"}
+              {brandEdit != "0" ? "Edit Brand" : "Create Brand"}
             </Drawer.Title>
           </Drawer.Header>
 
@@ -254,7 +254,7 @@ const BrandsPage = () => {
             </Drawer.Close>
 
             <Button
-              onClick={() => onUpdate(editBrand != "0", editBrand)}
+              onClick={() => onBrandUpdate(brandEdit != "0", brandEdit)}
               disabled={saving || !name}
             >
               Save

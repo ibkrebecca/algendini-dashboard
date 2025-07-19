@@ -2,13 +2,13 @@ import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { AdminCustomer, DetailWidgetProps } from "@medusajs/framework/types";
 import { Text, Select, DatePicker, Switch, Label, toast } from "@medusajs/ui";
 import { useEffect, useState } from "react";
-import { Header } from "../components/header";
-import { Container as UiContainer } from "../components/container";
+import { Header } from "@/components/header";
+import { Container as UiContainer } from "@/components/container";
 import { useQuery } from "@tanstack/react-query";
-import { sdk } from "../lib/config";
-import { Thumbnail } from "../components/thumbnail";
-import { FilePreview } from "../components/file/file-preview";
-import { JsonView } from "./json_view";
+import { sdk } from "@/lib/config";
+import { Thumbnail } from "@/components/thumbnail";
+import { FilePreview } from "@/components/file/file-preview";
+import { JsonView } from "@/widgets/json_view";
 
 type AdminCustomerExtended = AdminCustomer & {
   extended_customer?: {

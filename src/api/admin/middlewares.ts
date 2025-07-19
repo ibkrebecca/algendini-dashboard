@@ -7,7 +7,10 @@ import {
 import { z } from "zod";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators";
 
-export const GetBrandsSchema = createFindParams();
+export const GetBrandsSchema = createFindParams().extend({
+  q: z.string().optional(),
+  id: z.string().optional(),
+});
 
 const customerApis: Array<any> = [
   {

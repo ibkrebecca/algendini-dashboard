@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveBrandWorkflow } from "../../../../workflows/brand/retrieve";
+import { retrieveBrandWorkflow } from "@/workflows/brand/retrieve";
 
 // /store/brands/retrieve/ - retrieve all brand
 export async function GET(
@@ -7,11 +7,12 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { id } = req.query;
+    const { q, id } = req.query;
 
     // build filters
-    const filters: any = {};
+    const filters: Record<string, any> = {};
     if (id) filters.id = id;
+    if (q) filters.name = { $like: `%${q}%` };
 
     const { result: brands } = await retrieveBrandWorkflow(req.scope).run({
       input: {

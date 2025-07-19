@@ -3,7 +3,7 @@ import {
   MedusaResponse,
   MedusaNextFunction,
 } from "@medusajs/framework/http";
-import { IS_PROD } from "../../lib/constants";
+import { IS_PROD } from "@/lib/env";
 
 declare module "@medusajs/framework/http" {
   interface MedusaRequest {

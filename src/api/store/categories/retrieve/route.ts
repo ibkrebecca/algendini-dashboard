@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveCategoriesWorkflow } from "../../../../workflows/categories/retrieve";
+import { retrieveCategoriesWorkflow } from "@/workflows/categories/retrieve";
 
 // /store/categories/retrieve/ - retrieve all categories
 export async function GET(
@@ -13,7 +13,10 @@ export async function GET(
     const takeNum = parseInt(take as string) || 50;
 
     // build filters
-    const filters: any = { is_active: true, is_internal: false };
+    const filters: Record<string, any> = {
+      is_active: true,
+      is_internal: false,
+    };
     if (q) filters.name = { $ilike: `%${q}%` };
     if (id) filters.id = id;
 

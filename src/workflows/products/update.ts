@@ -5,7 +5,7 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { EXTENDED_PRODUCT_MODULE } from "../../modules/product";
+import { EXTENDED_PRODUCT_MODULE } from "@/../modules/product";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 interface InputType {
@@ -94,8 +94,6 @@ export const updateProductsWorkflow = createWorkflow(
       features: input.features,
     });
 
-    return new WorkflowResponse({
-      extended_product,
-    });
+    return new WorkflowResponse(extended_product);
   }
 );

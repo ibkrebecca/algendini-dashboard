@@ -5,8 +5,8 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { XCHANGE_MODULE } from "../../modules/xchange";
-import XchangeService from "../../modules/xchange/service";
+import { XCHANGE_MODULE } from "@/modules/xchange";
+import XchangeService from "@/modules/xchange/service";
 
 interface InputType {
   id: string;
@@ -62,8 +62,6 @@ export const updateXchangeWorkflow = createWorkflow(
   function (input: InputType) {
     const xchange = updateXchange(input);
 
-    return new WorkflowResponse({
-      xchange,
-    });
+    return new WorkflowResponse(xchange);
   }
 );

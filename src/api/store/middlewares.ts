@@ -4,9 +4,9 @@ import {
 } from "@medusajs/framework/http";
 import { z } from "zod";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators";
-import { corsMiddleware } from "../middlewares/cors";
-import { apiKeyAuth } from "../middlewares/api_key_auth";
-import { rateLimit } from "../middlewares/rate_limit";
+import { corsMiddleware } from "@/middlewares/cors";
+import { apiKeyAuth } from "@/middlewares/api_key_auth";
+import { rateLimit } from "@/middlewares/rate_limit";
 import { validateScopeProviderAssociation } from "@medusajs/medusa/api/auth/utils/validate-scope-provider-association";
 import { validateToken } from "@medusajs/medusa/api/auth/utils/validate-token";
 import multer from "multer";
@@ -141,6 +141,17 @@ const productApis: Array<any> = [
       rateLimit(10, 15 * 60 * 1000),
       upload.single("image"),
     ],
+  },
+
+  {
+    matcher: "/store/products/brand",
+    method: "POST",
+    middlewares: [corsMiddleware, apiKeyAuth, rateLimit(15, 15 * 60 * 1000)],
+    additionalDataValidator: {
+      id: z.string(),
+      brand_id: z.string(),
+      is_remove: z.string(),
+    },
   },
 ];
 

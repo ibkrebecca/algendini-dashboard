@@ -23,20 +23,17 @@ import {
   SENDGRID_API_KEY,
   SENDGRID_FROM,
   STORE_CORS,
-} from "./src/lib/constants";
+} from "./src/lib/env";
+import path from "path";
 
 loadEnv(NODE_ENV || "development", process.cwd());
 
-const localDbUrl = "postgres://algendini:0000@localhost:5400/algendini";
-const databaseUrl = IS_PROD ? DATABASE_URL! : localDbUrl;
 const getConnection = () => {
   if (IS_PROD) return { connection: { ssl: { rejectUnauthorized: false } } };
   return { connection: { ssl: false } };
 };
 
 const getEmailPass = () => {
-  if (IS_PROD) return {};
-
   return {
     resolve: "@medusajs/medusa/auth",
     dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
@@ -129,10 +126,11 @@ const getExtendedModel = () => {
     },
   ];
 };
+
 module.exports = defineConfig({
   projectConfig: {
-    databaseUrl: databaseUrl,
-    redisUrl: REDIS_URL || "redis://localhost:6379",
+    databaseUrl: DATABASE_URL,
+    redisUrl: REDIS_URL,
     databaseLogging: true,
     redisOptions: {
       maxRetriesPerRequest: 20,
@@ -150,13 +148,23 @@ module.exports = defineConfig({
       },
     },
     http: {
-      storeCors: STORE_CORS || "http://localhost:8000",
-      adminCors: ADMIN_CORS || "http://localhost:9000",
-      authCors: AUTH_CORS || "http://localhost:9000",
-      jwtSecret: JWT_SECRET || "supersecret",
-      cookieSecret: COOKIE_SECRET || "supersecret",
-      jwtExpiresIn: JWT_EXPIRES_IN || "7d",
+      storeCors: STORE_CORS!,
+      adminCors: ADMIN_CORS!,
+      authCors: AUTH_CORS!,
+      jwtSecret: JWT_SECRET!,
+      cookieSecret: COOKIE_SECRET!,
+      jwtExpiresIn: JWT_EXPIRES_IN!,
     },
   },
+  admin: {
+    vite: () => ({
+      resolve: {
+        alias: {
+          "@": path.resolve(__dirname, "./src/admin"),
+        },
+      },
+    }),
+  },
+
   modules: [getEmailPass(), getBucket(), getSendEmail(), ...getExtendedModel()],
 });

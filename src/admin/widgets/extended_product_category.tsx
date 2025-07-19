@@ -5,13 +5,13 @@ import {
 } from "@medusajs/framework/types";
 import { Button, toast } from "@medusajs/ui";
 import { useEffect, useState } from "react";
-import { Header } from "../components/header";
-import { Container as UiContainer } from "../components/container";
-import { FileType, FileUpload } from "../components/file/file-upload";
-import { FilePreview } from "../components/file/file-preview";
-import { Thumbnail } from "../components/thumbnail";
+import { Header } from "@/components/header";
+import { Container as UiContainer } from "@/components/container";
+import { FileType, FileUpload } from "@/components/file/file-upload";
+import { FilePreview } from "@/components/file/file-preview";
+import { Thumbnail } from "@/components/thumbnail";
 import { useQuery } from "@tanstack/react-query";
-import { sdk } from "../lib/config";
+import { sdk } from "@/lib/config";
 import { JsonView } from "./json_view";
 
 type AdminProductCategoryExtended = AdminProductCategory & {

@@ -1,6 +1,6 @@
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/medusa";
 import { Modules } from "@medusajs/framework/utils";
-import { ADMIN_URL, STORE_URL } from "../lib/constants";
+import { ADMIN_URL, STORE_URL } from "@/lib/env";
 
 export default async function resetPasswordTokenHandler({
   event: {

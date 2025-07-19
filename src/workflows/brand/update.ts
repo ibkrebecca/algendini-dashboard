@@ -5,8 +5,8 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { BRAND_MODULE } from "../../modules/brand";
-import BrandService from "../../modules/brand/service";
+import { BRAND_MODULE } from "@/../modules/brand";
+import BrandService from "@/../modules/brand/service";
 
 interface InputType {
   id: string;
@@ -59,8 +59,6 @@ export const updateBrandWorkflow = createWorkflow(
   function (input: InputType) {
     const brand = updateBrand(input);
 
-    return new WorkflowResponse({
-      brand,
-    });
+    return new WorkflowResponse(brand);
   }
 );
