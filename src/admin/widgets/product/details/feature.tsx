@@ -10,15 +10,12 @@ import {
   Prompt,
   Table,
   toast,
-  Text,
-  Select,
 } from "@medusajs/ui";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/header";
 import { Container as UiContainer } from "@/components/container";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { sdk } from "@/lib/config";
-import { JsonView } from "@/widgets/json_view";
 import { EllipsisHorizontal, PencilSquare, Trash } from "@medusajs/icons";
 
 type Feature = {
@@ -26,59 +23,34 @@ type Feature = {
   value: string;
 };
 
-type Brand = {
-  id: string;
-  name: string;
-};
-
-type BrandsResponse = {
-  brands: Brand[];
-  count: number;
-  limit: number;
-  offset: number;
-};
-
 type AdminProductExtended = AdminProduct & {
-  brand?: Brand;
   extended_product?: {
     features?: Feature[];
   };
 };
 
-// the extended product widget
-const ExtendedProductWidget = ({
+const FeatureWidget = ({
   data: product,
 }: DetailWidgetProps<AdminProductExtended>) => {
-  const queryClient = useQueryClient();
-  const HEADERS = {
-    "Content-Type": "application/json",
-    "x-publishable-api-key": import.meta.env.VITE_PUBLIC_KEY,
-  };
-
   const { data: qr } = useQuery({
     queryFn: () =>
       sdk.admin.product.retrieve(product.id, {
-        fields: "+brand.*,+extended_product.*",
+        fields: "+extended_product.*",
       }),
-    queryKey: [["product", product.id]],
+    queryKey: [["product_features", product.id]],
   });
 
   const prod = qr?.product as AdminProductExtended;
-  const brand = prod?.brand;
   const extended = prod?.extended_product;
 
-  const [featureTitle, setFeatureTitle] = useState("");
-  const [featureValue, setFeatureValue] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState<string | undefined>(
-    undefined
-  );
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState("");
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState<boolean>(false);
   const [features, setFeatures] = useState<Feature[]>([]);
-  const [saving, setSaving] = useState(false);
-
   const [featureDelete, setFeatureDelete] = useState<number | null>(null);
   const [featureEdit, setFeatureEdit] = useState<number | null>(null);
-  const [brandEdit, setBrandEdit] = useState<boolean>(false);
-  const [tableIndex, setTableIndex] = useState(0);
+  const [tableIndex, setTableIndex] = useState<number>(0);
   const tableSize = 10;
 
   useEffect(() => {
@@ -91,11 +63,6 @@ const ExtendedProductWidget = ({
     }
   }, [extended]);
 
-  const { data: brands } = useQuery<BrandsResponse>({
-    queryKey: ["brands"],
-    queryFn: () => sdk.client.fetch("/admin/brands/retrieve"),
-  });
-
   const hasLen = features.length === 1;
   const isEmpty = hasLen && Object.keys(features[0]).length === 0;
 
@@ -103,20 +70,12 @@ const ExtendedProductWidget = ({
   const canNextTable = tableIndex < tableCount - 1;
   const canPrevTable = tableIndex > 0;
 
-  const nextTable = () => {
-    if (canNextTable) setTableIndex(tableIndex + 1);
-  };
-
-  const prevTable = () => {
-    if (canPrevTable) setTableIndex(tableIndex - 1);
-  };
-
-  const onFeatureUpdate = async (isEdit: boolean, id: number | null) => {
+  const onUpdate = async (isEdit: boolean, id: number | null) => {
     setSaving(true);
 
     const newFeature: Feature = {
-      title: featureTitle,
-      value: featureValue,
+      title: title,
+      value: value,
     };
 
     let newFeatures: Feature[];
@@ -127,17 +86,22 @@ const ExtendedProductWidget = ({
       newFeatures = [...features, newFeature];
     }
 
-    await onFeatureUpdateApi(newFeatures);
+    await onUpdateApi(newFeatures);
   };
 
-  const onFeatureDelete = async (id: number | null) => {
+  const onDelete = async (id: number | null) => {
     const index: number = id! - 1;
     const newFeatures: Feature[] = features.filter((_, i) => i !== index);
 
-    await onFeatureUpdateApi(newFeatures);
+    await onUpdateApi(newFeatures);
   };
 
-  const onFeatureUpdateApi = async (newFeatures: Feature[]) => {
+  const onUpdateApi = async (newFeatures: Feature[]) => {
+    const HEADERS = {
+      "Content-Type": "application/json",
+      "x-publishable-api-key": import.meta.env.VITE_PUBLIC_KEY,
+    };
+
     try {
       await sdk.client.fetch("/store/products/update", {
         method: "POST",
@@ -158,89 +122,17 @@ const ExtendedProductWidget = ({
     }
   };
 
-  const onBrandUpdate = async () => {
-    setSaving(true);
-
-    try {
-      const old_brand_id: string = brand?.id ?? "null";
-
-      console.log(old_brand_id);
-      
-      await sdk.client.fetch(`/admin/brands/product`, {
-        method: "POST",
-        body: {
-          brand_id: selectedBrand,
-          old_brand_id: old_brand_id,
-          product_id: product.id,
-          is_remove: "false",
-        },
-      });
-
-      toast.success("Success", {
-        description: "Brand updated.",
-      });
-    } catch (error) {
-      toast.error("Error", {
-        description: "Failed to update brand.",
-      });
-    } finally {
-      onClean();
-    }
-  };
-
   const onClean = () => {
-    queryClient.invalidateQueries({ queryKey: [["product"]] });
+    queryClient.invalidateQueries({ queryKey: [["product_features"]] });
 
-    setFeatureTitle("");
-    setFeatureValue("");
-    setSelectedBrand(undefined);
+    setTitle("");
+    setValue("");
     setSaving(false);
     setFeatureEdit(null);
-    setBrandEdit(false);
   };
 
   return (
     <>
-      <UiContainer className="pb-4">
-        <Header
-          title="Brand"
-          actions={[
-            {
-              type: "action-menu",
-              props: {
-                groups: [
-                  {
-                    actions: [
-                      {
-                        icon: <PencilSquare />,
-                        label: "Edit",
-                        onClick: () => setBrandEdit(!brandEdit),
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-          ]}
-        />
-
-        <div className="flex h-full flex-col px-6 py-4">
-          <div className="text-ui-fg-subtle grid grid-cols-2 items-center">
-            <Text size="small" weight="plus" leading="compact">
-              Name
-            </Text>
-
-            <Text
-              size="small"
-              leading="compact"
-              className="whitespace-pre-line text-pretty"
-            >
-              {brand?.name || "-"}
-            </Text>
-          </div>
-        </div>
-      </UiContainer>
-
       <UiContainer className="pb-4">
         <Header
           title="Features"
@@ -279,7 +171,7 @@ const ExtendedProductWidget = ({
                         <DropdownMenu>
                           <DropdownMenu.Trigger asChild>
                             <IconButton variant="transparent">
-                              <EllipsisHorizontal />
+                              <EllipsisHorizontal className="text-ui-fg-subtle" />
                             </IconButton>
                           </DropdownMenu.Trigger>
 
@@ -288,11 +180,11 @@ const ExtendedProductWidget = ({
                               className="gap-x-2"
                               onClick={() => {
                                 setFeatureEdit(id);
-                                setFeatureTitle(features[index].title);
-                                setFeatureValue(features[index].value);
+                                setTitle(features[index].title);
+                                setValue(features[index].value);
                               }}
                             >
-                              <PencilSquare />
+                              <PencilSquare className="text-ui-fg-subtle" />
                               Edit
                             </DropdownMenu.Item>
 
@@ -302,7 +194,7 @@ const ExtendedProductWidget = ({
                               className="gap-x-2"
                               onClick={() => setFeatureDelete(id)}
                             >
-                              <Trash />
+                              <Trash className="text-ui-fg-subtle" />
                               Delete
                             </DropdownMenu.Item>
                           </DropdownMenu.Content>
@@ -321,15 +213,17 @@ const ExtendedProductWidget = ({
             count={features.length}
             pageSize={tableSize}
             pageIndex={tableIndex}
-            nextPage={nextTable}
-            previousPage={prevTable}
+            nextPage={() => {
+              if (canNextTable) setTableIndex(tableIndex + 1);
+            }}
+            previousPage={() => {
+              if (canPrevTable) setTableIndex(tableIndex - 1);
+            }}
           />
         </div>
       </UiContainer>
 
-      <JsonView data={extended || {}} title="EXTENDED JSON" />
-
-      {/* feature delete */}
+      {/* delete */}
       <Prompt
         open={featureDelete != null}
         onOpenChange={() => setFeatureDelete(null)}
@@ -346,14 +240,14 @@ const ExtendedProductWidget = ({
 
           <Prompt.Footer>
             <Prompt.Cancel>Cancel</Prompt.Cancel>
-            <Prompt.Action onClick={() => onFeatureDelete(featureDelete)}>
+            <Prompt.Action onClick={() => onDelete(featureDelete)}>
               Delete
             </Prompt.Action>
           </Prompt.Footer>
         </Prompt.Content>
       </Prompt>
 
-      {/* feature edit */}
+      {/* edit */}
       <Drawer
         open={featureEdit != null}
         onOpenChange={() => setFeatureEdit(null)}
@@ -375,8 +269,8 @@ const ExtendedProductWidget = ({
               </div>
               <Input
                 id="feature-title"
-                defaultValue={featureTitle}
-                onChange={(e) => setFeatureTitle(e.target.value)}
+                defaultValue={title}
+                onChange={(e) => setTitle(e.target.value)}
               />
             </div>
 
@@ -388,8 +282,8 @@ const ExtendedProductWidget = ({
               </div>
               <Input
                 id="feature-value"
-                defaultValue={featureValue}
-                onChange={(e) => setFeatureValue(e.target.value)}
+                defaultValue={value}
+                onChange={(e) => setValue(e.target.value)}
               />
             </div>
           </Drawer.Body>
@@ -400,58 +294,8 @@ const ExtendedProductWidget = ({
             </Drawer.Close>
 
             <Button
-              onClick={() => onFeatureUpdate(featureEdit != 0, featureEdit)}
-              disabled={saving || !featureTitle || !featureValue}
-            >
-              Save
-            </Button>
-          </Drawer.Footer>
-        </Drawer.Content>
-      </Drawer>
-
-      {/* brand edit  */}
-      <Drawer open={brandEdit} onOpenChange={() => setBrandEdit(false)}>
-        <Drawer.Trigger asChild />
-        <Drawer.Content>
-          <Drawer.Header>
-            <Drawer.Title>Edit Brand</Drawer.Title>
-          </Drawer.Header>
-
-          <Drawer.Body className="flex flex-col gap-y-4 p-4">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center gap-x-1">
-                <Label size="small" weight="plus">
-                  Brand
-                </Label>
-              </div>
-
-              <Select
-                value={selectedBrand || brand?.id || undefined}
-                onValueChange={setSelectedBrand}
-              >
-                <Select.Trigger>
-                  <Select.Value placeholder="Select a brand..." />
-                </Select.Trigger>
-
-                <Select.Content>
-                  {brands?.brands.map((brand) => (
-                    <Select.Item key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select>
-            </div>
-          </Drawer.Body>
-
-          <Drawer.Footer>
-            <Drawer.Close asChild>
-              <Button variant="secondary">Cancel</Button>
-            </Drawer.Close>
-
-            <Button
-              onClick={() => onBrandUpdate()}
-              disabled={saving || !selectedBrand}
+              onClick={() => onUpdate(featureEdit != 0, featureEdit)}
+              disabled={saving || !title || !value}
             >
               Save
             </Button>
@@ -466,4 +310,4 @@ export const config = defineWidgetConfig({
   zone: "product.details.side.after",
 });
 
-export default ExtendedProductWidget;
+export default FeatureWidget;
