@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { deleteCustomerWorkflow } from "@/workflows/store/customers/delete";
+import { deleteCustomerWorkflow } from "@/workflows/store/customer/delete";
 
 interface InputType {
   id: string;

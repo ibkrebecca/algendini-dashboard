@@ -66,7 +66,7 @@ const ExtendedProductCategoryWidget = ({
       formData.append("image", file);
 
       const data = await sdk.client.fetch<{ url: string }>(
-        "/store/upload/single_image",
+        "/store/uploads/single_image",
         {
           method: "POST",
           headers: {

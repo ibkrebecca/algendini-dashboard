@@ -5,7 +5,7 @@ import {
   MedusaResponse,
 } from "@medusajs/framework/http";
 
-// /store/upload/single_image/ - upload single image
+// /store/uploads/single_image/ - upload single image
 export async function POST(
   req: AuthenticatedMedusaRequest,
   res: MedusaResponse

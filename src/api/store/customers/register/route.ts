@@ -1,6 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
-import { registerCustomerWorkflow } from "@/workflows/store/customers/register";
+import { registerCustomerWorkflow } from "@/workflows/store/customer/register";
 import { generateJwtTokenForAuthIdentity } from "@medusajs/medusa/api/auth/utils/generate-jwt-token";
 
 interface InputType {

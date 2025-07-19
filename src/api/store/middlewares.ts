@@ -133,7 +133,7 @@ const productApis: Array<any> = [
   },
 
   {
-    matcher: "/store/upload/single_image",
+    matcher: "/store/uploads/single_image",
     method: "POST",
     middlewares: [
       corsMiddleware,
