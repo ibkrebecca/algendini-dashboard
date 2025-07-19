@@ -3,6 +3,7 @@ import {
   MedusaResponse,
   MedusaNextFunction,
 } from "@medusajs/framework/http";
+import { APP_URL } from "@/lib/env";
 
 export function corsMiddleware(
   req: MedusaRequest,
@@ -11,8 +12,6 @@ export function corsMiddleware(
 ): void {
   let allowedOrigin: string;
   const requestOrigin = req.headers.origin as string;
-
-  const APP_URL = process.env.APP_URL!;
   const allowedOrigins = APP_URL!.split(",").map((url) => url.trim());
 
   if (requestOrigin && allowedOrigins.includes(requestOrigin)) {

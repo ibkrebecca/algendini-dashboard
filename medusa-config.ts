@@ -165,6 +165,5 @@ module.exports = defineConfig({
       },
     }),
   },
-
   modules: [getEmailPass(), getBucket(), getSendEmail(), ...getExtendedModel()],
 });

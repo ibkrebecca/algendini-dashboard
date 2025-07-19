@@ -65,17 +65,19 @@ const ExtendedProductCategoryWidget = ({
       const formData = new FormData();
       formData.append("image", file);
 
-      const data = await sdk.client.fetch<{ url: string }>(
-        "/store/uploads/single_image",
+      const res = await fetch(
+        `${import.meta.env.VITE_STORE_URL}/store/uploads/single_image`,
         {
           method: "POST",
           headers: {
             "x-publishable-api-key": PUBLIC_KEY,
           },
           body: formData,
+          credentials: "include",
         }
       );
 
+      const data = await res.json();
       const url = data.url;
       await onUpdate(url);
     } catch {
@@ -116,7 +118,7 @@ const ExtendedProductCategoryWidget = ({
           <FileUpload
             label="Category Image"
             hint="select category image"
-            formats={["jpg", "jpeg", "png"]}
+            formats={["jpg", "jpeg", "png", "webp"]}
             multiple={false}
             onUploaded={onImageChange}
           />
