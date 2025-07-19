@@ -1,5 +1,5 @@
 // src/modules/customer/index.ts
-import ExtendedCustomerModuleService from "./service";
+import ExtendedCustomerModuleService from "@/modules/customer/service";
 import { Module } from "@medusajs/framework/utils";
 
 export const EXTENDED_CUSTOMER_MODULE = "extended_customer";

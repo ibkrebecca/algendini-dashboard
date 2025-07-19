@@ -23,7 +23,7 @@ import {
   SENDGRID_API_KEY,
   SENDGRID_FROM,
   STORE_CORS,
-} from "./src/lib/env";
+} from "@/lib/env";
 import path from "path";
 
 loadEnv(NODE_ENV || "development", process.cwd());

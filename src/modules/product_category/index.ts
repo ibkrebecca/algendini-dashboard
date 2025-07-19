@@ -1,5 +1,5 @@
 // src/modules/product_category/index.ts
-import ExtendedProductCategoryService from "./service";
+import ExtendedProductCategoryService from "@/modules/product_category/service";
 import { Module } from "@medusajs/framework/utils";
 
 export const EXTENDED_PRODUCT_CATEGORY_MODULE = "extended_product_category";

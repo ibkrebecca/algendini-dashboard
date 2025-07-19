@@ -3,7 +3,6 @@ import {
   MedusaResponse,
   MedusaNextFunction,
 } from "@medusajs/framework/http";
-import { IS_PROD } from "@/lib/env";
 
 declare module "@medusajs/framework/http" {
   interface MedusaRequest {
@@ -31,13 +30,9 @@ export function apiKeyAuth(
     return;
   }
 
-  // validate API key (you should store this securely in environment variables)
-  const LOCAL_PUBLIC_KEY = process.env.LOCAL_PUBLIC_KEY!;
+  // validate API key
   const PUBLIC_KEY = process.env.PUBLIC_KEY!;
-
-  const localPublicKey = LOCAL_PUBLIC_KEY?.split(",") || [];
-  const prodPublicKey = PUBLIC_KEY?.split(",") || [];
-  const publicKey = IS_PROD ? prodPublicKey : localPublicKey;
+  const publicKey = PUBLIC_KEY?.split(",") || [];
 
   if (!publicKey.includes(apiKey)) {
     res.status(401).json({

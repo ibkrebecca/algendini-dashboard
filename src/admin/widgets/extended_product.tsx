@@ -18,7 +18,7 @@ import { Header } from "@/components/header";
 import { Container as UiContainer } from "@/components/container";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { sdk } from "@/lib/config";
-import { JsonView } from "./json_view";
+import { JsonView } from "@/widgets/json_view";
 import { EllipsisHorizontal, PencilSquare, Trash } from "@medusajs/icons";
 
 type Feature = {
@@ -51,12 +51,10 @@ const ExtendedProductWidget = ({
   data: product,
 }: DetailWidgetProps<AdminProductExtended>) => {
   const queryClient = useQueryClient();
-  const IS_PROD = import.meta.env.PROD;
   const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
   const HEADERS = {
     "Content-Type": "application/json",
-    "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+    "x-publishable-api-key": PUBLIC_KEY,
   };
 
   const { data: qr } = useQuery({
@@ -168,7 +166,7 @@ const ExtendedProductWidget = ({
       await sdk.client.fetch(`/store/products/brand`, {
         method: "POST",
         headers: HEADERS,
-        body: { id: product.id, brand_id: selectedBrand, is_remove: 'false' },
+        body: { id: product.id, brand_id: selectedBrand, is_remove: "false" },
       });
 
       toast.success("Success", {

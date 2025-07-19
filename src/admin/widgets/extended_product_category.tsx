@@ -12,7 +12,7 @@ import { FilePreview } from "@/components/file/file-preview";
 import { Thumbnail } from "@/components/thumbnail";
 import { useQuery } from "@tanstack/react-query";
 import { sdk } from "@/lib/config";
-import { JsonView } from "./json_view";
+import { JsonView } from "@/widgets/json_view";
 
 type AdminProductCategoryExtended = AdminProductCategory & {
   extended_product_category?: {
@@ -24,12 +24,10 @@ type AdminProductCategoryExtended = AdminProductCategory & {
 const ExtendedProductCategoryWidget = ({
   data: category,
 }: DetailWidgetProps<AdminProductCategoryExtended>) => {
-  const IS_PROD = import.meta.env.PROD;
   const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
   const HEADERS = {
     "Content-Type": "application/json",
-    "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+    "x-publishable-api-key": PUBLIC_KEY,
   };
 
   const { data: qr } = useQuery({
@@ -72,7 +70,7 @@ const ExtendedProductCategoryWidget = ({
         {
           method: "POST",
           headers: {
-            "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+            "x-publishable-api-key": PUBLIC_KEY,
           },
           body: formData,
         }

@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { retrieveXchangeWorkflow } from "@/workflows/xchange/retrieve";
+import { retrieveXchangeWorkflow } from "@/workflows/store/xchange/retrieve";
 
 // /store/xchange/retrieve/ - retrieve all xchange
 export async function GET(

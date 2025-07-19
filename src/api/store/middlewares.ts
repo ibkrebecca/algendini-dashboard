@@ -4,9 +4,9 @@ import {
 } from "@medusajs/framework/http";
 import { z } from "zod";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators";
-import { corsMiddleware } from "@/middlewares/cors";
-import { apiKeyAuth } from "@/middlewares/api_key_auth";
-import { rateLimit } from "@/middlewares/rate_limit";
+import { corsMiddleware } from "@/api/middlewares/cors";
+import { apiKeyAuth } from "@/api/middlewares/api_key_auth";
+import { rateLimit } from "@/api/middlewares/rate_limit";
 import { validateScopeProviderAssociation } from "@medusajs/medusa/api/auth/utils/validate-scope-provider-association";
 import { validateToken } from "@medusajs/medusa/api/auth/utils/validate-token";
 import multer from "multer";

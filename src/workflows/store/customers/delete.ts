@@ -6,7 +6,7 @@ import {
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
-import { EXTENDED_CUSTOMER_MODULE } from "@/../modules/customer";
+import { EXTENDED_CUSTOMER_MODULE } from "@/modules/customer";
 import { AuthIdentityDTO } from "@medusajs/framework/types";
 
 interface InputType {

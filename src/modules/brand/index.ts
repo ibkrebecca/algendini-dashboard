@@ -1,5 +1,5 @@
 // src/modules/brand/index.ts
-import BrandService from "./service";
+import BrandService from "@/modules/brand/service";
 import { Module } from "@medusajs/framework/utils";
 
 export const BRAND_MODULE = "brand";

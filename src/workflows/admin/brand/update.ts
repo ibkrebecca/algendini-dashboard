@@ -5,8 +5,8 @@ import {
   WorkflowResponse,
   StepResponse,
 } from "@medusajs/framework/workflows-sdk";
-import { BRAND_MODULE } from "@/../modules/brand";
-import BrandService from "@/../modules/brand/service";
+import { BRAND_MODULE } from "@/modules/brand";
+import BrandService from "@/modules/brand/service";
 
 interface InputType {
   id: string;

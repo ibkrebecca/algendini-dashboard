@@ -134,12 +134,10 @@ const BrandsPage = () => {
   });
 
   const queryClient = useQueryClient();
-  const IS_PROD = import.meta.env.PROD;
   const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY;
-  const LOCAL_PUBLIC_KEY = import.meta.env.VITE_LOCAL_PUBLIC_KEY;
   const HEADERS = {
     "Content-Type": "application/json",
-    "x-publishable-api-key": IS_PROD ? PUBLIC_KEY : LOCAL_PUBLIC_KEY,
+    "x-publishable-api-key": PUBLIC_KEY,
   };
 
   const onBrandUpdate = async (isEdit: boolean, id: string | null) => {
