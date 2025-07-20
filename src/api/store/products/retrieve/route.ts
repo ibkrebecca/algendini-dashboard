@@ -7,7 +7,16 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { order, skip = 0, take = 25, q, id, random, categories } = req.query;
+    const {
+      order,
+      skip = 0,
+      take = 25,
+      q,
+      id,
+      random,
+      categories,
+      brand_id,
+    } = req.query;
     const orderObj = JSON.parse((order as string) || "{}");
 
     const skipNum = parseInt(skip as string) || 0;
@@ -23,12 +32,13 @@ export async function GET(
     const filters: Record<string, any> = { status: "published" };
     if (q) filters.title = { $ilike: `%${q}%` };
     if (id) filters.id = id;
+    if (brand_id) filters.brand = { id: brand_id };
 
     // parse categories from query and add to filters
-    if (categories) {
-      const catIds = (categories as string).split(",");
-      filters.categories = { id: { $in: catIds } };
-    }
+    // if (categories) {
+    //   const catIds = (categories as string).split(",");
+    //   filters.categories = { id: { $in: catIds } };
+    // }
 
     const { result: products } = await retrieveProductsWorkflow(req.scope).run({
       input: {

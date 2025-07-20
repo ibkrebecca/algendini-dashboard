@@ -8,7 +8,7 @@ export default defineLink(
   ExtendedCustomerModule.linkable.extendedCustomer,
   {
     database: {
-      table: "customer_extended",
+      table: "customer_extended_link",
     },
   }
 );

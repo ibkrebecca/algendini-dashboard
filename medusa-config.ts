@@ -107,8 +107,11 @@ const getSendEmail = () => {
   };
 };
 
-const getExtendedModel = () => {
+const getCustomModel = () => {
   return [
+    {
+      resolve: "@medusajs/index",
+    },
     {
       resolve: "./src/modules/customer",
     },
@@ -165,5 +168,5 @@ module.exports = defineConfig({
       },
     }),
   },
-  modules: [getEmailPass(), getBucket(), getSendEmail(), ...getExtendedModel()],
+  modules: [getEmailPass(), getBucket(), getSendEmail(), ...getCustomModel()],
 });

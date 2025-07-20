@@ -1,6 +1,9 @@
 export const NODE_ENV = process.env.NODE_ENV;
 export const IS_PROD = NODE_ENV === "production";
 
+export const REGION_ID = process.env.REGION_ID;
+export const REGION_CURRENCY = process.env.REGION_CURRENCY;
+
 export const ADMIN_URL = process.env.ADMIN_URL;
 export const STORE_URL = process.env.STORE_URL;
 export const APP_URL = process.env.APP_URL;

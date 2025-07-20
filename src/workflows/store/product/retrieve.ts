@@ -9,6 +9,7 @@ import {
   ContainerRegistrationKeys,
   QueryContext,
 } from "@medusajs/framework/utils";
+import { REGION_CURRENCY, REGION_ID } from "@/lib/env";
 
 // retrieve products
 const retrieveProducts = createStep(
@@ -16,7 +17,7 @@ const retrieveProducts = createStep(
   async (input: any, { container }) => {
     const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
-    const { data: products, metadata: { count } = {} } = await query.graph({
+    const { data: products } = await query.index({
       entity: "product",
       fields: [
         "*",
@@ -42,8 +43,8 @@ const retrieveProducts = createStep(
       context: {
         variants: {
           calculated_price: QueryContext({
-            region_id: "reg_01JS9A6Y581Q4X0VS5DXDQS49F", // TODO: change id in prod
-            currency_code: "try",
+            region_id: REGION_ID,
+            currency_code: REGION_CURRENCY,
           }),
         },
       },
@@ -57,7 +58,6 @@ const retrieveProducts = createStep(
     if (!products) throw new Error(`No products found`);
     return new StepResponse({
       products,
-      count,
       order: input.order,
       skip: input.skip,
       take: input.take,
