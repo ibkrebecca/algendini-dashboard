@@ -11,13 +11,24 @@ import {
 } from "@medusajs/framework/utils";
 import { REGION_CURRENCY, REGION_ID } from "@/lib/env";
 
+interface InputType {
+  filters?: any;
+  order?: any;
+  skip?: number;
+  take?: number;
+  withGraph?: boolean;
+}
+
 // retrieve products
 const retrieveProducts = createStep(
   "retrieve_products",
-  async (input: any, { container }) => {
+  async (input: InputType, { container }) => {
     const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
-    const { data: products } = await query.index({
+    let result: any;
+    let products: any;
+
+    const queryObj: any = {
       entity: "product",
       fields: [
         "*",
@@ -53,8 +64,15 @@ const retrieveProducts = createStep(
         skip: input.skip,
         take: input.take,
       },
-    });
+    };
 
+    if (input.withGraph) {
+      result = await query.graph(queryObj);
+    } else {
+      result = await query.index(queryObj);
+    }
+
+    products = result.data;
     if (!products) throw new Error(`No products found`);
     return new StepResponse({
       products,
@@ -68,7 +86,7 @@ const retrieveProducts = createStep(
 // workflow
 export const retrieveProductsWorkflow = createWorkflow(
   "retrieve_products_workflow",
-  function (input) {
+  function (input: InputType) {
     const products = retrieveProducts(input);
 
     return new WorkflowResponse(products);

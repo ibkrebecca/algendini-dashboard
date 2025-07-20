@@ -121,11 +121,11 @@ const BrandsPage = () => {
   };
 
   const columns = [
-    columnHelper.accessor("id", {
-      header: "ID",
-    }),
     columnHelper.accessor("name", {
       header: "Name",
+    }),
+    columnHelper.accessor("id", {
+      header: "ID",
     }),
     colAction(),
   ];

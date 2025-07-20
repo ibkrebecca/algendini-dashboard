@@ -1,9 +1,17 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { retrieveProductsWorkflow } from "@/workflows/store/product/retrieve";
 
+interface InputType {
+  filters?: any;
+  order?: any;
+  skip?: number;
+  take?: number;
+  withGraph?: boolean;
+}
+
 // /store/products/retrieve/ - retrieve all products
 export async function GET(
-  req: MedusaRequest,
+  req: MedusaRequest<InputType>,
   res: MedusaResponse
 ): Promise<void> {
   try {
@@ -14,11 +22,11 @@ export async function GET(
       q,
       id,
       random,
-      categories,
+      category_id,
       brand_id,
     } = req.query;
+    let withGraph: boolean = true;
     const orderObj = JSON.parse((order as string) || "{}");
-
     const skipNum = parseInt(skip as string) || 0;
     const takeNum = parseInt(take as string) || 25;
 
@@ -32,11 +40,13 @@ export async function GET(
     const filters: Record<string, any> = { status: "published" };
     if (q) filters.title = { $ilike: `%${q}%` };
     if (id) filters.id = id;
+    if (category_id) filters.categories = { $eq: category_id };
+
+    // custom models filter
     if (brand_id) filters.brand = { id: brand_id };
 
-    // parse categories from query and add to filters
-    // if (categories) {
-    //   const catIds = (categories as string).split(",");
+    // if (category_id) {
+    //   const catIds = (category_id as string).split(",");
     //   filters.categories = { id: { $in: catIds } };
     // }
 
@@ -46,6 +56,7 @@ export async function GET(
         order: orderObj,
         skip: random ? randomSkip : skipNum,
         take: takeNum,
+        withGraph,
       },
     });
 

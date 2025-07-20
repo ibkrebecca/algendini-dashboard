@@ -16,6 +16,7 @@ export async function GET(
     const filters: Record<string, any> = {
       is_active: true,
       is_internal: false,
+      parent_category_id: null,
     };
     if (q) filters.name = { $ilike: `%${q}%` };
     if (id) filters.id = id;
